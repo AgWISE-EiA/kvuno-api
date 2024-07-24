@@ -1,0 +1,25 @@
+[tool.poetry]
+name = "kvuno-api"
+version = "1.0.0"
+description = ""
+authors = ["Munywele S <barsamms@gmail.com>"]
+readme = "README.md"
+
+[tool.poetry.dependencies]
+python = "^3.10"
+flask = "^3.0.3"
+pyreadr = "^0.5.0"
+pandas = "^2.2.2"
+python-dotenv = "^1.0.1"
+sqlalchemy = "^2.0.31"
+mariadb = "^1.1.10"
+loguru = "^0.7.2"
+
+
+[tool.poetry.group.dev.dependencies]
+alembic = "^1.13.2"
+sqlacodegen = {version = "^3.0.0rc5", allow-prereleases = true}
+
+[build-system]
+requires = ["poetry-core"]
+build-backend = "poetry.core.masonry.api"
