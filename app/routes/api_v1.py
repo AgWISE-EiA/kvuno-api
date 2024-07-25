@@ -1,6 +1,11 @@
 from flask import jsonify
 from flask_openapi3 import APIBlueprint, Tag
 
+from app.routes.query_data import Unauthorized
+
+security = [{"jwt": []}]
+tag = Tag(name='AgWise', description="AgWise API")
+
 api_v1 = APIBlueprint(
     'api_v1',
     __name__,
@@ -13,10 +18,6 @@ api_v1 = APIBlueprint(
 )
 
 kvuno_tag = Tag(name="kvuno", description="Data serving API")
-
-@api_v1.get('/name/<string:name>', tags=[kvuno_tag])
-def test_string(name):
-    return jsonify(f"Name to be printed is {name}")
 
 
 @api_v1.get("/get-data", tags=[kvuno_tag])

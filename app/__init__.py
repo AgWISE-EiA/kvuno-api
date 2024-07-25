@@ -1,8 +1,12 @@
+import os
+
+from dotenv import load_dotenv
 from flask_openapi3 import OpenAPI, Server, Contact, License, Info
 
 from app.routes.api_v1 import api_v1
 from app.routes.app_routes import register_app_routes
 
+load_dotenv()
 contact = Contact(name="Munywele Sammy", email="sammy@munywele.co.ke", url="https://munywele.co.ke")
 
 apiLicense = License(
@@ -18,7 +22,7 @@ info = Info(title="KVuno API",
 
 servers = [
     Server(url="http://127.0.0.1:5000"),
-    Server(url="https://akilimo.org:5000"),
+    Server(url=os.getenv("SERVER_URL_PROD", "https://kvuno.akilimo.org")),
 ]
 
 

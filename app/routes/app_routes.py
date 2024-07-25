@@ -1,4 +1,4 @@
-from flask import jsonify
+from flask import redirect
 
 
 def register_app_routes(app):
@@ -10,24 +10,11 @@ def register_app_routes(app):
     """
 
     @app.route('/')
-    def app_test():
+    def index():
         """
         Route for the root URL.
 
         Returns:
-            Response: JSON response with a test message.
+            Response: Redirect to /openapi/rapidoc.
         """
-        return jsonify('This is a route defined with @app')
-
-    @app.route('/app-name/<string:name>')
-    def app_name(name):
-        """
-        Route for the app name URL.
-
-        Args:
-            name (str): The name parameter from the URL.
-
-        Returns:
-            Response: JSON response with the app route name.
-        """
-        return jsonify(f"App route name: {name}")
+        return redirect('/openapi/rapidoc')
