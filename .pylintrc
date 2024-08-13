@@ -1,0 +1,17 @@
+[MAIN]
+# Enable most refactor suggestions
+# You might want to adjust this based on your preference
+enable=refactoring
+suggestion-mode=yes
+score=yes
+
+[MESSAGE CONTROL]
+disable=C0103,W0718
+
+[FORMAT]
+max-line-length=550
+
+
+[TYPECHECK]
+# Ignored names
+#ignore=
