@@ -19,7 +19,7 @@ class ProcessedFilesRepo:
     def get_processed_files(self):
         return self.db.query(ProcessedFiles).all()
 
-    def add_processed_file(self, processed_file):
+    def add_processed_file(self, processed_file: ProcessedFiles):
         self.db.add(processed_file)
         self.db.commit()
 
