@@ -25,16 +25,17 @@ crop_data_repo = CropDataRepo()
 
 def process_file(file_path: str, batch_size: int = 1000):
     start_time = time.time()  # Start timing
+    file_name = os.path.basename(file_path)  # Extract the filename without path
 
     try:
-        result = pyreadr.read_r(file_path)
-        data = result[None]  # Assuming this returns a DataFrame or equivalent
-        crop_data_records = []
         checksum = calculate_file_checksum(file_path, logger)
 
         if processed_files_repo.get_processed_file_by_checksum(checksum):
-            logger.info(f"File {file_path} is already processed.")
+            logger.info(f"File {file_name} is already processed. checksum: {checksum}")
             return
+        result = pyreadr.read_r(file_path)
+        data = result[None]  # Assuming this returns a DataFrame or equivalent
+        crop_data_records = []
 
         for index, row in data.iterrows():
             record = CropRecord(
@@ -67,12 +68,12 @@ def process_file(file_path: str, batch_size: int = 1000):
             check_sum=checksum
         )
         processed_files_repo.add_processed_file(processed_file=processed_file)
-        logger.info(f"File {file_path} processed and recorded")
+        logger.info(f"File {file_name} processed and recorded")
     except Exception as e:
-        logger.error(f"Failed to process file {file_path}: {e}")
+        logger.error(f"Failed to process file {file_name}: {e}")
     finally:
         elapsed_time = time.time() - start_time
-        logger.info(f"Processing file {file_path} took {elapsed_time:.2f} seconds")
+        logger.info(f"Processing file {file_name} took {elapsed_time:.2f} seconds")
 
 
 def load_rds_to_db(data_folder: str, batch_size: int = 1000):

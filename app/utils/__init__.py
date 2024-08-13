@@ -11,6 +11,9 @@ def calculate_file_checksum(file_path, logger, algorithm='sha256'):
 
     Returns:
         str: The checksum of the file content.
+        :param algorithm:
+        :param file_path:
+        :param logger:
     """
     hash_func = hashlib.new(algorithm)
     logger.debug(f'Calculating checksum for {file_path} using [{algorithm}] algorithm.')

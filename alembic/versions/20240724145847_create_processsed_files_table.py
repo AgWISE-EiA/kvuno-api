@@ -22,8 +22,8 @@ def upgrade() -> None:
     op.create_table(
         f"{table_name}",
         sa.Column('id', sa.BigInteger, primary_key=True),
-        sa.Column('file_name', sa.String(50), unique=True, nullable=False),
         sa.Column('check_sum', sa.String(100), unique=True, nullable=False),
+        sa.Column('file_name', sa.String(120), unique=False, nullable=False),
         sa.Column('processed_at', sa.DateTime, server_default=sa.func.now())
     )
 
