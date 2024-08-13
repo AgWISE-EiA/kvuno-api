@@ -1,5 +1,7 @@
+import concurrent.futures
 import logging
 import os
+import time
 
 import pandas as pd
 import pyreadr
@@ -21,58 +23,67 @@ processed_files_repo = ProcessedFilesRepo()
 crop_data_repo = CropDataRepo()
 
 
-def load_rds_to_db(data_folder, batch_size: int = 1000):
-    for filename in os.listdir(data_folder):
+def process_file(file_path: str, batch_size: int = 1000):
+    start_time = time.time()  # Start timing
 
-        if filename.endswith('.RDS'):
-            file_path = os.path.join(data_folder, filename)
-            logger.info(f"Processing file: {filename}")
-            checksum = calculate_file_checksum(file_path, logger)
-            logger.debug(f"Checksum for {file_path}: {checksum}")
-            crop_data_records = []
+    try:
+        result = pyreadr.read_r(file_path)
+        data = result[None]  # Assuming this returns a DataFrame or equivalent
+        crop_data_records = []
+        checksum = calculate_file_checksum(file_path, logger)
 
-            # Check if file is already processed
-            if processed_files_repo.get_processed_file_by_checksum(checksum):
-                logger.info(f"File {filename} is already processed.")
-                continue
+        if processed_files_repo.get_processed_file_by_checksum(checksum):
+            logger.info(f"File {file_path} is already processed.")
+            return
 
-            result = pyreadr.read_r(file_path)
-            data = result[None]
-            for index, row in data.iterrows():
-                logger.debug(f"Processing record {index}")
-
-                # Convert NA values to None (which will become NULL in the database)
-                record = CropRecord(
-                    coordinates=row['XY'] if pd.notna(row['XY']) else None,
-                    country=row['country'] if pd.notna(row['country']) else None,
-                    province=row['province'] if pd.notna(row['province']) else None,
-                    lon=row['lon'] if pd.notna(row['lon']) else None,
-                    lat=row['lat'] if pd.notna(row['lat']) else None,
-                    variety=row['Variety'] if pd.notna(row['Variety']) else None,
-                    season_type=row['Season_type'] if pd.notna(row['Season_type']) else None,
-                    opt_date=row['Opt_date'] if pd.notna(row['Opt_date']) else None,
-                    planting_option=int(row['Planting_Option']) if pd.notna(row['Planting_Option']) else None,
-                    check_sum=checksum
-                )
-
-                crop_data_records.append(record)
-                if len(crop_data_records) >= batch_size:
-                    crop_data_repo.batch_insert(crop_data_records)
-                    crop_data_records.clear()  # clear the batch
-
-            # Insert remaining records
-            if crop_data_records:
-                crop_data_repo.batch_insert(crop_data_records)
-                crop_data_records.clear()
-
-            logger.info("Finished processing all files, now tracking checksum {checksum}")
-            processed_file = ProcessedFiles(
-                file_name=filename,
+        for index, row in data.iterrows():
+            record = CropRecord(
+                coordinates=row['XY'] if pd.notna(row['XY']) else None,
+                country=row['country'] if pd.notna(row['country']) else None,
+                province=row['province'] if pd.notna(row['province']) else None,
+                lon=row['lon'] if pd.notna(row['lon']) else None,
+                lat=row['lat'] if pd.notna(row['lat']) else None,
+                variety=row['Variety'] if pd.notna(row['Variety']) else None,
+                season_type=row['Season_type'] if pd.notna(row['Season_type']) else None,
+                opt_date=row['Opt_date'] if pd.notna(row['Opt_date']) else None,
+                planting_option=int(row['Planting_Option']) if pd.notna(row['Planting_Option']) else None,
                 check_sum=checksum
             )
-            processed_files_repo.add_processed_file(processed_file=processed_file)
+            crop_data_records.append(record)
+
+            if len(crop_data_records) >= batch_size:
+                crop_data_repo.batch_insert(crop_data_records)
+                logger.info(f"Processed batch {len(crop_data_records)} records from {file_path}")
+                crop_data_records.clear()  # Clear the batch
+
+        # Insert remaining records
+        if crop_data_records:
+            logger.info(f"Inserting final batch of {len(crop_data_records)} records")
+            crop_data_repo.batch_insert(crop_data_records)
+            crop_data_records.clear()
+
+        processed_file = ProcessedFiles(
+            file_name=os.path.basename(file_path),
+            check_sum=checksum
+        )
+        processed_files_repo.add_processed_file(processed_file=processed_file)
+        logger.info(f"File {file_path} processed and recorded")
+    except Exception as e:
+        logger.error(f"Failed to process file {file_path}: {e}")
+    finally:
+        elapsed_time = time.time() - start_time
+        logger.info(f"Processing file {file_path} took {elapsed_time:.2f} seconds")
+
+
+def load_rds_to_db(data_folder: str, batch_size: int = 1000):
+    file_paths = [os.path.join(data_folder, f) for f in os.listdir(data_folder) if f.endswith('.RDS')]
+    logger.info(f"Starting to process {len(file_paths)} files from {data_folder}")
+    with concurrent.futures.ThreadPoolExecutor() as executor:
+        futures = [executor.submit(process_file, file_path, batch_size) for file_path in file_paths]
+        concurrent.futures.wait(futures)
+    logger.info("Finished processing all files")
 
 
 if __name__ == '__main__':
-    rds_folder = os.path.join("static/" 'data')
-    load_rds_to_db(data_folder=rds_folder, batch_size=10)
+    rds_folder = os.path.join("static/", 'data')
+    load_rds_to_db(data_folder=rds_folder, batch_size=1000)
