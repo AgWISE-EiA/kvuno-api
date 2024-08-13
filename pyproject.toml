@@ -23,6 +23,7 @@ pandas = "^2.2.2"
 [tool.poetry.group.dev.dependencies]
 alembic = "^1.13.2"
 sqlacodegen = { version = "^3.0.0rc5", allow-prereleases = true }
+pylint = "^3.2.6"
 
 [build-system]
 requires = ["poetry-core"]

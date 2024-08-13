@@ -1,3 +1,6 @@
+"""
+Housekeeping script that processes rDS files and inserts data to database
+"""
 import concurrent.futures
 import logging
 import os
@@ -24,6 +27,18 @@ crop_data_repo = CropDataRepo()
 
 
 def process_file(file_path: str, batch_size: int = 1000):
+    """
+    Processes a single file by reading its contents, converting data to `CropRecord` instances,
+    and inserting records into the database. The file is only processed if its checksum is not
+    already recorded in the processed files repository.
+
+    Args:
+        file_path (str): The path to the file to be processed.
+        batch_size (int): The number of records to batch insert into the database. Defaults to 1000.
+
+    Raises:
+        FileNotFoundError: If the specified file is not found.
+    """
     start_time = time.time()  # Start timing
     file_name = os.path.basename(file_path)  # Extract the filename without path
 
@@ -33,11 +48,13 @@ def process_file(file_path: str, batch_size: int = 1000):
         if processed_files_repo.get_processed_file_by_checksum(checksum):
             logger.info(f"File {file_name} is already processed. checksum: {checksum}")
             return
+
         result = pyreadr.read_r(file_path)
         data = result[None]  # Assuming this returns a DataFrame or equivalent
         crop_data_records = []
 
         for index, row in data.iterrows():
+            logger.debug(f"Processing row {index} from {file_name}")
             record = CropRecord(
                 coordinates=row['XY'] if pd.notna(row['XY']) else None,
                 country=row['country'] if pd.notna(row['country']) else None,
@@ -54,7 +71,7 @@ def process_file(file_path: str, batch_size: int = 1000):
 
             if len(crop_data_records) >= batch_size:
                 crop_data_repo.batch_insert(crop_data_records)
-                logger.info(f"Processed batch {len(crop_data_records)} records from {file_path}")
+                logger.info(f"Processed batch of {len(crop_data_records)} records from {file_path}")
                 crop_data_records.clear()  # Clear the batch
 
         # Insert remaining records
@@ -69,7 +86,7 @@ def process_file(file_path: str, batch_size: int = 1000):
         )
         processed_files_repo.add_processed_file(processed_file=processed_file)
         logger.info(f"File {file_name} processed and recorded")
-    except Exception as e:
+    except FileNotFoundError as e:
         logger.error(f"Failed to process file {file_name}: {e}")
     finally:
         elapsed_time = time.time() - start_time
@@ -77,11 +94,21 @@ def process_file(file_path: str, batch_size: int = 1000):
 
 
 def load_rds_to_db(data_folder: str, batch_size: int = 1000):
+    """
+    Loads and processes all RDS files from a specified directory by submitting them for processing
+    using a thread pool executor. Each file is processed in a separate thread.
+
+    Args:
+        data_folder (str): The directory containing the RDS files to be processed.
+        batch_size (int): The number of records to batch insert into the database. Defaults to 1000.
+    """
     file_paths = [os.path.join(data_folder, f) for f in os.listdir(data_folder) if f.endswith('.RDS')]
     logger.info(f"Starting to process {len(file_paths)} files from {data_folder}")
+
     with concurrent.futures.ThreadPoolExecutor() as executor:
         futures = [executor.submit(process_file, file_path, batch_size) for file_path in file_paths]
         concurrent.futures.wait(futures)
+
     logger.info("Finished processing all files")
 
 
