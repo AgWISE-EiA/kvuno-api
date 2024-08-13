@@ -1,7 +1,7 @@
 import hashlib
 
 
-def calculate_file_checksum(file_path, logger, algorithm='sha256'):
+def calculate_file_checksum(file_path, logger, algorithm='sha256') -> str | None:
     """
     Calculate the checksum of a file using the specified algorithm.
 
