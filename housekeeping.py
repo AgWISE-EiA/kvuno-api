@@ -1,5 +1,5 @@
 """
-Housekeeping script that processes rDS files and inserts data to database
+Housekeeping script that processes RDS files and inserts data into the database
 """
 import concurrent.futures
 import logging
@@ -113,7 +113,7 @@ def process_file(file_path: str, batch_size: int = 1000, chunk_size: int = 10000
 def load_rds_to_db(data_folder: str, batch_size: int = 1000, chunk_size: int = 10000):
     """
     Loads and processes all RDS files from a specified directory by submitting them for processing
-    using a thread pool executor. Each file is processed in a separate thread.
+    using a process pool executor. Each file is processed in a separate process.
 
     Args:
         data_folder (str): The directory containing the RDS files to be processed.
@@ -122,12 +122,14 @@ def load_rds_to_db(data_folder: str, batch_size: int = 1000, chunk_size: int = 1
     """
     file_paths = [os.path.join(data_folder, f) for f in os.listdir(data_folder) if f.endswith('.RDS')]
 
+    global_start_time = time.time()  # Start timing
     logger.info(f"Starting to process {len(file_paths)} files from {data_folder}")
 
     with concurrent.futures.ThreadPoolExecutor() as executor:
         executor.map(lambda file_path: process_file(file_path, batch_size, chunk_size), file_paths)
 
-    logger.info("Finished processing all files")
+    global_elapsed_time = time.time() - global_start_time
+    logger.info(f"Processing all files  took {global_elapsed_time:.2f} seconds")
 
 
 if __name__ == '__main__':
