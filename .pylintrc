@@ -5,8 +5,14 @@ enable=refactoring
 suggestion-mode=yes
 score=yes
 
+ignore-patterns=kvuno.*\.py,.*_test\.py
+
+[DESIGN]
+max-locals=20
+
+
 [MESSAGE CONTROL]
-disable=C0103,W0718
+disable=C0103,W0718,C0114,C0115,C0116
 
 [FORMAT]
 max-line-length=550

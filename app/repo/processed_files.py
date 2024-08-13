@@ -1,4 +1,5 @@
 import logging
+from typing import Optional, List, Type
 
 from sqlalchemy.orm import sessionmaker
 
@@ -11,33 +12,84 @@ shared_logger = SharedLogger(level=logging.DEBUG)
 
 class ProcessedFilesRepo:
     def __init__(self):
-        self.db_engine = MyDb()
-        self.session = sessionmaker(bind=self.db_engine)
-        self.db = self.session()
         self.logger = shared_logger.get_logger()
 
-    def get_processed_files(self):
-        return self.db.query(ProcessedFiles).all()
+    def _get_session(self):
+        db_engine = MyDb()  # This is a class that contains the database connection
+        self.session = sessionmaker(bind=db_engine)
+        self.db = self.session()
+        return self.db
 
-    def add_processed_file(self, processed_file: ProcessedFiles):
-        self.db.add(processed_file)
-        self.db.commit()
+    def get_processed_files(self) -> list[Type[ProcessedFiles]]:
+        session = self._get_session()
+        try:
+            processed_files = session.query(ProcessedFiles).all()
+            self.logger.info("Retrieved all processed files")
+            return processed_files
+        except Exception as e:
+            self.logger.error(f"Failed to retrieve processed files: {e}")
+            raise
 
-    def get_processed_file_by_id(self, record_id):
-        return self.db.query(ProcessedFiles).filter_by(id=record_id).first()
+    def add_processed_file(self, processed_file: ProcessedFiles) -> None:
+        session = self._get_session()
+        try:
+            session.add(processed_file)
+            session.commit()
+            self.logger.info(f"Added processed file with ID: {processed_file.id}")
+        except Exception as e:
+            session.rollback()
+            self.logger.error(f"Failed to add processed file: {e}")
+            raise
 
-    def get_processed_file_by_checksum(self, checksum):
-        return (self.db
-                .query(ProcessedFiles, ProcessedFiles.check_sum)
-                .filter_by(check_sum=checksum).first())
+    def get_processed_file_by_id(self, record_id: int) -> Optional[ProcessedFiles]:
+        session = self._get_session()
+        try:
+            processed_file = session.query(ProcessedFiles).filter_by(id=record_id).first()
+            self.logger.info(f"Retrieved processed file with ID: {record_id}")
+            return processed_file
+        except Exception as e:
+            self.logger.error(f"Failed to retrieve processed file with ID {record_id}: {e}")
+            raise
 
-    def get_processed_file_by_name(self, file_name):
-        return self.db.query(ProcessedFiles).filter_by(file_name=file_name).first()
+    def get_processed_file_by_checksum(self, checksum: str) -> Optional[ProcessedFiles]:
+        session = self._get_session()
+        try:
+            processed_file = (session.query(ProcessedFiles)
+                              .filter_by(check_sum=checksum).first())
+            self.logger.info(f"Retrieved processed file with checksum: {checksum}")
+            return processed_file
+        except Exception as e:
+            self.logger.error(f"Failed to retrieve processed file with checksum {checksum}: {e}")
+            raise
 
-    def delete_processed_file(self, processed_file):
-        self.db.delete(processed_file)
-        self.db.commit()
+    def get_processed_file_by_name(self, file_name: str) -> Optional[ProcessedFiles]:
+        session = self._get_session()
+        try:
+            processed_file = session.query(ProcessedFiles).filter_by(file_name=file_name).first()
+            self.logger.info(f"Retrieved processed file with name: {file_name}")
+            return processed_file
+        except Exception as e:
+            self.logger.error(f"Failed to retrieve processed file with name {file_name}: {e}")
+            raise
 
-    def insert_processed_files(self, processed_files):
-        self.db.add_all(processed_files)
-        self.db.commit()
+    def delete_processed_file(self, processed_file: ProcessedFiles) -> None:
+        session = self._get_session()
+        try:
+            session.delete(processed_file)
+            session.commit()
+            self.logger.info(f"Deleted processed file with ID: {processed_file.id}")
+        except Exception as e:
+            session.rollback()
+            self.logger.error(f"Failed to delete processed file with ID {processed_file.id}: {e}")
+            raise
+
+    def insert_processed_files(self, processed_files: List[ProcessedFiles]) -> None:
+        session = self._get_session()
+        try:
+            session.add_all(processed_files)
+            session.commit()
+            self.logger.info(f"Batch inserted {len(processed_files)} processed files")
+        except Exception as e:
+            session.rollback()
+            self.logger.error(f"Failed to batch insert processed files: {e}")
+            raise
