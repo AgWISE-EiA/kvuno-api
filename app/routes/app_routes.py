@@ -1,4 +1,6 @@
-from flask import redirect
+from flask import redirect, jsonify
+
+from app.models.database_conn import MyDb
 
 
 def register_app_routes(app):
@@ -18,3 +20,13 @@ def register_app_routes(app):
             Response: Redirect to /openapi/rapidoc.
         """
         return redirect('/openapi/rapidoc')
+
+    @app.route('/health', methods=['GET'])
+    def health_check():
+        db_connected = MyDb.check_db_connection()
+
+        health_status = {
+            "status": "healthy" if db_connected else "unhealthy",
+            "database": "UP" if db_connected else "DOWN"
+        }
+        return jsonify(health_status), 200 if db_connected else 500

@@ -2,7 +2,7 @@
 FROM python:3.12-slim
 
 # Update the package list and install net-tools
-RUN apt-get update && apt-get install -y net-tools
+RUN apt-get update && apt-get install -y net-tools curl
 
 RUN mkdir /app
 
@@ -21,7 +21,7 @@ RUN poetry config virtualenvs.create false
 
 RUN poetry install --no-root
 
-RUN pip install gunicorn
+#RUN pip install gunicorn
 
 # Copy the rest of the application code into the container
 COPY . /app
@@ -31,6 +31,5 @@ COPY . /app
 EXPOSE 5000
 
 # Define the command to run your Flask app
-#CMD [ "poetry", "run", "python", "-m", "flask", "run", "--host=0.0.0.0" ]
 #CMD ["gunicorn", "-c", "app/gunicorn_config.py", "wsgi:app"]
 CMD [ "python3", "run.py"]

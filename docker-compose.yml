@@ -10,15 +10,6 @@ services:
       - "5000:5000"
     volumes:
       - .:/app
-#    environment:
-#      FLASK_ENV: development
-#      DB_URL: ${DB_URL}
-#      LOG_LEVEL: ${LOG_LEVEL:-info}
-#      DEBUG_DB: ${LOG_LEVEL:-0}
-#    depends_on:
-#      - db
-#    networks:
-#      - my_network
 
   db:
     container_name: db
@@ -35,24 +26,3 @@ services:
       - "3306:3306"
     #    volumes:
     #      - "./sql-migration/kvuno.sql:/docker-entrypoint-initdb.d/1.sql"
-    networks:
-      - my_network
-
-  adminer:
-    container_name: adminer
-    hostname: adminer
-    image: adminer
-    environment:
-      ADMINER_DEFAULT_DB_DRIVER: mysql
-      ADMINER_DEFAULT_DB_HOST: db
-    #      ADMINER_DEFAULT_DB_NAME: ${DB_SERVICE}
-    #      ADMINER_DESIGN: ${THEME}
-    #      ADMINER_PLUGINS: ${PLUGINS}
-    restart: unless-stopped
-    ports:
-      - "8080:8080"
-    networks:
-      - my_network
-
-networks:
-  my_network:
