@@ -1,10 +1,10 @@
+import decimal
 from dataclasses import dataclass
 from typing import Optional
 
 
 @dataclass
 class CropRecord:
-    check_sum: str
     coordinates: Optional[str]
     country: Optional[str]
     province: Optional[str]

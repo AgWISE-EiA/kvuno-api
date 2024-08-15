@@ -1,7 +1,9 @@
 import logging
-from typing import Optional, List
+from typing import Optional, List, Type, Dict
 
-from sqlalchemy.orm import sessionmaker
+from flask_sqlalchemy.pagination import QueryPagination
+from sqlalchemy import and_
+from sqlalchemy.orm import Query
 
 from app.dto.data_class import CropRecord
 from app.models.database_conn import MyDb
@@ -16,10 +18,9 @@ class CropDataRepo:
         self.logger = shared_logger.get_logger()
 
     def _get_session(self):
-        db_engine = MyDb()  # This is a class that contains the database connection
-        self.session = sessionmaker(bind=db_engine)
-        self.db = self.session()
-        return self.db
+        # Ensure that `MyDb` has been initialized with a Flask app
+        self.db = MyDb.get_db()
+        return self.db.session
 
     def add(self, crop_data: CropData) -> CropData:
         session = self._get_session()
@@ -44,15 +45,79 @@ class CropDataRepo:
             self.logger.error(f"Failed to retrieve CropData with ID {crop_id}: {e}")
             raise
 
-    def get_all(self) -> List[CropData]:
+    def get_all(self, page, per_page) -> list[Type[CropData]]:
         session = self._get_session()
+        offset = (page - 1) * per_page
         try:
-            crop_data_list = session.query(CropData).all()
+            crop_data_list = (session.query(CropData)
+                              .offset(offset)
+                              .limit(per_page)
+                              .all())
+
             self.logger.info("Retrieved all CropData records")
             return crop_data_list
         except Exception as e:
             self.logger.error(f"Failed to retrieve all CropData records: {e}")
             raise
+
+    def get_filtered_data(self, filters: dict) -> Query:
+
+        session = self._get_session()
+
+        query = session.query(CropData)
+
+        if 'coordinates' in filters:
+            query = query.filter(CropData.coordinates == filters['coordinates'])
+        if 'country' in filters:
+            query = query.filter(CropData.country == filters['country'])
+        if 'province' in filters:
+            query = query.filter(CropData.province == filters['province'])
+        if 'lon' in filters:
+            query = query.filter(CropData.lon == filters['lon'])
+        if 'lat' in filters:
+            query = query.filter(CropData.lat == filters['lat'])
+        if 'variety' in filters:
+            query = query.filter(CropData.variety == filters['variety'])
+        if 'season_type' in filters:
+            query = query.filter(CropData.season_type == filters['season_type'])
+        if 'opt_date' in filters:
+            query = query.filter(CropData.opt_date == filters['opt_date'])
+        if 'planting_option' in filters:
+            query = query.filter(CropData.planting_option == filters['planting_option'])
+        if 'check_sum' in filters:
+            query = query.filter(CropData.check_sum == filters['check_sum'])
+
+        return query
+
+    def get_paginated_data(self, filters: dict, page: int, per_page: int) -> QueryPagination:
+        query = self.get_filtered_data(filters)
+
+        return query.paginate(page=page, per_page=per_page, error_out=False)
+
+    # def get_paginated_data(self, filters: dict, page: int, per_page: int):
+    #     query = self.get_filtered_data(filters)
+    #     total_items = query.count()  # Get total number of items
+    #     paginated_data = query.offset((page - 1) * per_page).limit(per_page).all()
+    #     total_pages = (total_items + per_page - 1) // per_page  # Calculate total pages
+    #     return paginated_data, total_items, total_pages
+
+    def get_filtered_data_old(self, filters: Dict[str, str], page: int, per_page: int) -> list:
+
+        session = self._get_session()
+
+        offset = (page - 1) * per_page
+
+        # Build filter conditions
+        filter_conditions = [getattr(CropData, column) == value for column, value in filters.items() if
+                             hasattr(CropData, column)]
+
+        # Apply filter conditions
+        if filter_conditions:
+            query = session.query(CropData).filter(and_(*filter_conditions))
+        else:
+            query = session.query(CropData)
+
+        return query.offset(offset).limit(per_page).all()
 
     def update(self, crop_data: CropData) -> CropData:
         session = self._get_session()

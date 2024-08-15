@@ -3,6 +3,7 @@ import os
 from dotenv import load_dotenv
 from flask_openapi3 import OpenAPI, Server, Contact, License, Info
 
+from app.models.database_conn import MyDb
 from app.routes.api_v1 import api_v1
 from app.routes.app_routes import register_app_routes
 
@@ -30,6 +31,13 @@ def create_app():
     app = OpenAPI(__name__,
                   info=info,
                   servers=servers)
+
+    # Set the SQLALCHEMY_DATABASE_URI directly in app config
+    app.config['SQLALCHEMY_DATABASE_URI'] = os.getenv("DB_URL")
+    app.config['SQLALCHEMY_ECHO'] = os.getenv('DEBUG_DB') == '1'
+
+    # Initialize the database with the Flask app
+    MyDb.init_app(app)
 
     app.register_api(api_v1)
     app.json.sort_keys = False
