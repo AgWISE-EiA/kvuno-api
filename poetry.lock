@@ -428,29 +428,6 @@ lingua = ["lingua"]
 testing = ["pytest"]
 
 [[package]]
-name = "mariadb"
-version = "1.1.10"
-description = "Python MariaDB extension"
-optional = false
-python-versions = ">=3.8"
-files = [
-    {file = "mariadb-1.1.10-cp310-cp310-win32.whl", hash = "sha256:1d81b22efbaaf4c5bc5e4cc4e2ef3c459538c1a939371089d8c5591d6f26a62e"},
-    {file = "mariadb-1.1.10-cp310-cp310-win_amd64.whl", hash = "sha256:dff8b28ce4044574870d7bdd2d9f9f5da8e5f95a7ff6d226185db733060d1a93"},
-    {file = "mariadb-1.1.10-cp311-cp311-win32.whl", hash = "sha256:1ce87971c02375236ff8933e6c593c748e7b2f2950b86eabfab4289fd250ea63"},
-    {file = "mariadb-1.1.10-cp311-cp311-win_amd64.whl", hash = "sha256:4521aa721f926946bd71491f872e8babc78fa97755ed2114f5684b77363107cb"},
-    {file = "mariadb-1.1.10-cp312-cp312-win32.whl", hash = "sha256:03d6284ef713d1cad40146576a4cc2d6cbc1662060f2a0e59b174e1694521698"},
-    {file = "mariadb-1.1.10-cp312-cp312-win_amd64.whl", hash = "sha256:8c8c6b27486b0e1772a23002c702b5fd244eecf9f05633dd6cb345fc26755a20"},
-    {file = "mariadb-1.1.10-cp38-cp38-win32.whl", hash = "sha256:5d652117e2fdf12b9723e7452a05fce9e6ccbae6ea48871b21a3a8fde259dc48"},
-    {file = "mariadb-1.1.10-cp38-cp38-win_amd64.whl", hash = "sha256:49200378c614984f5ec875481662a49d7c97c2be27970b01b32fa4b7520d4e22"},
-    {file = "mariadb-1.1.10-cp39-cp39-win32.whl", hash = "sha256:d7b09ec4abd02ed235257feb769f90cd4066e8f536b55b92f5166103d5b66a63"},
-    {file = "mariadb-1.1.10-cp39-cp39-win_amd64.whl", hash = "sha256:29040e426f877ddc45f337c6eb381b6bbab63cc6bf8431a28effe30162142513"},
-    {file = "mariadb-1.1.10.tar.gz", hash = "sha256:a332893e3ef7ceb7970ab4bd7c844bcb4bd68a051ca51313566f9808d7411f2d"},
-]
-
-[package.dependencies]
-packaging = "*"
-
-[[package]]
 name = "markdown-it-py"
 version = "3.0.0"
 description = "Python port of markdown-it. Markdown parsing, done right!"
@@ -911,6 +888,21 @@ spelling = ["pyenchant (>=3.2,<4.0)"]
 testutils = ["gitpython (>3)"]
 
 [[package]]
+name = "pymysql"
+version = "1.1.1"
+description = "Pure Python MySQL Driver"
+optional = false
+python-versions = ">=3.7"
+files = [
+    {file = "PyMySQL-1.1.1-py3-none-any.whl", hash = "sha256:4de15da4c61dc132f4fb9ab763063e693d521a80fd0e87943b9a453dd4c19d6c"},
+    {file = "pymysql-1.1.1.tar.gz", hash = "sha256:e127611aaf2b417403c60bf4dc570124aeb4a57f5f37b8e95ae399a42f904cd0"},
+]
+
+[package.extras]
+ed25519 = ["PyNaCl (>=1.4.0)"]
+rsa = ["cryptography"]
+
+[[package]]
 name = "pyreadr"
 version = "0.5.0"
 description = "Reads/writes R RData and Rds files into/from pandas data frames."
@@ -1315,4 +1307,4 @@ files = [
 [metadata]
 lock-version = "2.0"
 python-versions = "^3.10"
-content-hash = "f93140979c3affca3f842188ab40fa0d15abb97107623cecb7029b2fcab09b44"
+content-hash = "0f906752d8714273452823e0a706ee03eb620297e9989a6208b4932f897d0afb"
