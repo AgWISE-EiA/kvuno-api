@@ -13,24 +13,16 @@ RUN pip install poetry
 WORKDIR /app
 
 # Copy the pyproject-old.toml and poetry.lock files into the container
-#COPY pyproject.toml poetry.lock /app/
-COPY pyproject.toml /app/
+COPY pyproject-old.toml poetry.lock /app/
 
 # Install project dependencies using Poetry
-RUN poetry config virtualenvs.create false
-
-RUN poetry install --no-root
-
-RUN pip install gunicorn
+RUN poetry install --no-dev
 
 # Copy the rest of the application code into the container
 COPY . /app
-
 
 # Make port 80 available to the world outside this container
 EXPOSE 5000
 
 # Define the command to run your Flask app
-#CMD [ "poetry", "run", "python", "-m", "flask", "run", "--host=0.0.0.0" ]
-#CMD ["gunicorn", "-c", "app/gunicorn_config.py", "wsgi:app"]
-CMD [ "python3", "run.py"]
+CMD ["gunicorn"  , "-b", "0.0.0.0", "wsgi:app"]
