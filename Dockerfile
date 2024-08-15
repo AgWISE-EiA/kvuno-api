@@ -1,5 +1,5 @@
 # Use an official Python runtime as a parent image
-FROM python:3.12-slim
+FROM python:3.10-slim
 
 # Update the package list and install net-tools
 RUN apt-get update && apt-get install -y net-tools
@@ -13,18 +13,19 @@ RUN pip install poetry
 WORKDIR /app
 
 # Copy the pyproject-old.toml and poetry.lock files into the container
-COPY pyproject.toml poetry.lock /app/
+#COPY pyproject.toml poetry.lock /app/
+COPY pyproject.toml /app/
 
 # Install project dependencies using Poetry
-RUN poetry install
+RUN poetry install --no-root --no-dev
 
 # generate thr requirements.txt
 
-RUN poetry export --without-hashes --format=requirements.txt > requirements.txt
+#RUN poetry export --without-hashes --format=requirements.txt > requirements.txt
 
-RUN pip install --no-cache-dir --upgrade -r requirements.txt
+#RUN pip install --no-cache-dir --upgrade -r requirements.txt
 
-#RUN pip install gunicorn
+RUN pip install gunicorn
 
 # Copy the rest of the application code into the container
 COPY . /app

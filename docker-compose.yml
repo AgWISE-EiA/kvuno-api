@@ -1,5 +1,5 @@
 services:
-  app:
+  kvuno:
     container_name: kvuno
     hostname: kvuno
     image: masgeek/kvuno-api:${TAG:-latest}
@@ -10,15 +10,15 @@ services:
       - "5000:5000"
     volumes:
       - .:/app
-    environment:
-      FLASK_ENV: development
-      DB_URL: ${DB_URL}
-      LOG_LEVEL: ${LOG_LEVEL:-info}
-      DEBUG_DB: ${LOG_LEVEL:-0}
-    depends_on:
-      - db
-    networks:
-      - my_network
+#    environment:
+#      FLASK_ENV: development
+#      DB_URL: ${DB_URL}
+#      LOG_LEVEL: ${LOG_LEVEL:-info}
+#      DEBUG_DB: ${LOG_LEVEL:-0}
+#    depends_on:
+#      - db
+#    networks:
+#      - my_network
 
   db:
     container_name: db
