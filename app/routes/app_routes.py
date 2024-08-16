@@ -17,9 +17,9 @@ def register_app_routes(app):
         Route for the root URL.
 
         Returns:
-            Response: Redirect to /openapi/rapidoc.
+            Response: Redirect to /openapi/swagger.
         """
-        return redirect('/openapi/rapidoc')
+        return redirect('/openapi/swagger')
 
     @app.route('/health', methods=['GET'])
     def health_check():
