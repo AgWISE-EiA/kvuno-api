@@ -15,10 +15,9 @@ class ProcessedFilesRepo:
         self.logger = shared_logger.get_logger()
 
     def _get_session(self):
-        db_engine = MyDb()  # This is a class that contains the database connection
-        self.session = sessionmaker(bind=db_engine)
-        self.db = self.session()
-        return self.db
+        # Ensure that `MyDb` has been initialized with a Flask app
+        self.db = MyDb.get_db()
+        return self.db.session
 
     def get_processed_files(self) -> list[Type[ProcessedFiles]]:
         session = self._get_session()

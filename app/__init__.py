@@ -2,6 +2,7 @@ import os
 
 from dotenv import load_dotenv
 from flask_openapi3 import OpenAPI, Server, Contact, License, Info
+from flask_cors import CORS
 
 from app.models.database_conn import MyDb
 from app.routes.api_v1 import api_v1
@@ -31,6 +32,8 @@ def create_app():
     app = OpenAPI(__name__,
                   info=info,
                   servers=servers)
+
+    CORS(app)  # Enable CORS for all routes
 
     # Set the SQLALCHEMY_DATABASE_URI directly in app config
     app.config['SQLALCHEMY_DATABASE_URI'] = os.getenv("DB_URL")
