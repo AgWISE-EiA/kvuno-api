@@ -111,7 +111,11 @@ def process_file(file_path: str, batch_size: int = 1000, chunk_size: int = 10000
             logger.error(f"Unexpected error processing file {file_name}: {e}")
         finally:
             elapsed_time = time.time() - start_time
-            logger.info(f"Processing file {file_name} took {elapsed_time:.2f} seconds")
+            if elapsed_time > 60:
+                minutes, seconds = divmod(elapsed_time, 60)
+                logger.info(f"Processing file {file_name} took {int(minutes)} minutes and {seconds:.2f} seconds")
+            else:
+                logger.info(f"Processing file {file_name} took {elapsed_time:.2f} seconds")
 
 
 def load_rds_to_db(data_folder: str, batch_size: int = 1000, chunk_size: int = 10000):
@@ -134,9 +138,14 @@ def load_rds_to_db(data_folder: str, batch_size: int = 1000, chunk_size: int = 1
             executor.map(lambda file_path: process_file(file_path, batch_size, chunk_size), file_paths)
 
     global_elapsed_time = time.time() - global_start_time
-    logger.info(f"Processing all files  took {global_elapsed_time:.2f} seconds")
+    if global_elapsed_time > 60:
+        minutes, seconds = divmod(global_elapsed_time, 60)
+        logger.info(f"Processing all files took {int(minutes)} minutes and {seconds:.2f} seconds")
+    else:
+        logger.info(f"Processing all files took {global_elapsed_time:.2f} seconds")
 
 
 if __name__ == '__main__':
     rds_folder = os.path.join("static/", 'data')
-    load_rds_to_db(data_folder=rds_folder, batch_size=1000, chunk_size=10000)
+    load_rds_to_db(data_folder=rds_folder, batch_size=1500, chunk_size=20000)
+

@@ -22,12 +22,7 @@ def upgrade() -> None:
     # Add partitioning to the existing table
     op.execute("""
     ALTER TABLE crop_data
-    PARTITION BY HASH(id) PARTITIONS 10;
-    """)
-
-    # Optional: Verify the partitions
-    op.execute("""
-    SHOW CREATE TABLE crop_data;
+    PARTITION BY HASH(check_sum) PARTITIONS 10;
     """)
 
 
@@ -36,9 +31,4 @@ def downgrade() -> None:
     op.execute("""
     ALTER TABLE crop_data
     REMOVE PARTITIONING;
-    """)
-
-    # Optional: Verify the partitions have been removed
-    op.execute("""
-    SHOW CREATE TABLE crop_data;
     """)
