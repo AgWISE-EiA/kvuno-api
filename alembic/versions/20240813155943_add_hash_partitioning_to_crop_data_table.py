@@ -1,4 +1,4 @@
-"""add tabel partitions for date to crop_data table
+"""add table partitions for id to crop_data table
 
 Revision ID: 430cc2e94c1e
 Revises: f608c4212225
