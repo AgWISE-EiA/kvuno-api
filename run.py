@@ -28,6 +28,7 @@ from app import create_app
 load_dotenv()
 
 app = create_app()
+app.app_context().push()  # Push the application context for use in the script
 
 if __name__ == '__main__':
     # Use environment variables
