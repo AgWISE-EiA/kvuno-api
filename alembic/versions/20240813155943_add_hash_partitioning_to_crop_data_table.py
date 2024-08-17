@@ -19,16 +19,7 @@ table_name = 'crop_data'
 
 
 def upgrade() -> None:
-    # Add partitioning to the existing table
-    op.execute("""
-    ALTER TABLE crop_data
-    PARTITION BY HASH(check_sum) PARTITIONS 10;
-    """)
-
+    pass
 
 def downgrade() -> None:
-    # Remove partitioning if rolling back
-    op.execute("""
-    ALTER TABLE crop_data
-    REMOVE PARTITIONING;
-    """)
+    pass
