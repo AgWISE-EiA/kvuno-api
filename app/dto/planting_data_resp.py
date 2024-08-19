@@ -17,7 +17,7 @@ class Coordinates(BaseModel):
 
 @dataclass
 class PlantingDataRecord:
-    coordinates: Coordinates
+    coordinates: Optional[str]
     country: Optional[str]
     province: Optional[str]
     lon: Optional[str]

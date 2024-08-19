@@ -3,6 +3,8 @@ from typing import Optional
 
 from pydantic import BaseModel, Field, ConfigDict
 
+from app.dto.planting_data_resp import Coordinates
+
 
 @dataclass
 class PlantingDataFilterBase:
