@@ -4,7 +4,7 @@ from flask_openapi3 import Tag, APIBlueprint
 
 from app.config import API_PREFIX, API_VERSION
 from app.dto.api_responses import PlantingDataRecord, CropRecordResponse, Unauthorized
-from app.dto.data_filters import PlantingDataFilters
+from app.dto.data_filters import PlantingDataFilter
 from app.repo.planting_data import PlantingDataRepo
 from app.utils.logging import SharedLogger
 
@@ -25,7 +25,7 @@ planting_data_repo = PlantingDataRepo()
 
 @api.get('/',
          responses={200: CropRecordResponse, 401: Unauthorized})
-def get_data(query: PlantingDataFilters):
+def get_data(query: PlantingDataFilter):
     page = int(request.args.get('page', default=1, type=int))
     per_page = int(request.args.get('per_page', default=50, type=int))
 

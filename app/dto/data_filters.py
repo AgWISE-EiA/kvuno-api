@@ -7,7 +7,7 @@ from dataclasses import dataclass, field as dataclass_field
 
 
 @dataclass
-class CropDataFiltersBase:
+class PlantingDataFilterBase:
     coordinates: Optional[str] = Field(None, description='Coordinates in lon,lat format')
     country: Optional[str] = Field(None, description='Country where the crop is located')
     province: Optional[str] = Field(None, description='Province where the crop is located')
@@ -19,7 +19,7 @@ class CropDataFiltersBase:
     planting_option: Optional[int] = Field(None, description='Option for planting, typically an integer')
 
 
-class PlantingDataFilters(BaseModel, CropDataFiltersBase):
+class PlantingDataFilter(BaseModel, PlantingDataFilterBase):
     model_config = ConfigDict(
         use_enum_values=True,
         str_strip_whitespace=True

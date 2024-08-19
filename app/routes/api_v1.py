@@ -4,7 +4,7 @@ from flask import request, jsonify
 from flask_openapi3 import APIBlueprint, Tag
 
 from app.dto.api_responses import PlantingDataRecord, CropRecordResponse, Pagination, Unauthorized
-from app.dto.data_filters import PlantingDataFilters
+from app.dto.data_filters import PlantingDataFilter
 from app.repo.planting_data import PlantingDataRepo
 from app.utils.logging import SharedLogger
 
@@ -33,7 +33,7 @@ crop_data_repo = PlantingDataRepo()
             tags=[kvuno_tag],
             responses={200: CropRecordResponse, 401: Unauthorized}
             )
-def get_data(query: PlantingDataFilters):
+def get_data(query: PlantingDataFilter):
     page = int(request.args.get('page', default=1, type=int))
     per_page = int(request.args.get('per_page', default=50, type=int))
 

@@ -5,7 +5,7 @@ from flask_sqlalchemy.pagination import QueryPagination
 from sqlalchemy.orm import Query
 
 from app.dto.api_responses import PlantingDataRecord
-from app.dto.data_filters import PlantingDataFilters
+from app.dto.data_filters import PlantingDataFilter
 from app.models.database_conn import MyDb
 from app.models.kvuno import PlantingData
 from app.utils.logging import SharedLogger
@@ -60,7 +60,7 @@ class PlantingDataRepo:
             self.logger.error(f"Failed to retrieve all PlantingData records: {e}")
             raise
 
-    def get_filtered_data(self, filters: PlantingDataFilters) -> Query:
+    def get_filtered_data(self, filters: PlantingDataFilter) -> Query:
 
         session = self._get_session()
 
@@ -88,7 +88,7 @@ class PlantingDataRepo:
 
         return query
 
-    def get_paginated_data(self, filters: PlantingDataFilters, page: int, per_page: int) -> QueryPagination:
+    def get_paginated_data(self, filters: PlantingDataFilter, page: int, per_page: int) -> QueryPagination:
         query = self.get_filtered_data(filters)
 
         return query.paginate(page=page, per_page=per_page, error_out=False)
