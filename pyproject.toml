@@ -22,6 +22,7 @@ pandas = "^2.2.2"
 flask-sqlalchemy = "^3.1.1"
 pymysql = "^1.1.1"
 flask-cors = "^4.0.1"
+#apiflask = "^2.2.0"
 
 
 [tool.poetry.group.dev.dependencies]

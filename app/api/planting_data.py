@@ -1,46 +1,37 @@
 import logging
+from flask import Blueprint, request, jsonify
+from flask_openapi3 import Tag, APIBlueprint
 
-from flask import request, jsonify
-from flask_openapi3 import APIBlueprint, Tag
-
-from app.dto.api_responses import PlantingDataRecord, CropRecordResponse, Pagination, Unauthorized
+from app.config import API_PREFIX, API_VERSION
+from app.dto.api_responses import PlantingDataRecord, CropRecordResponse, Unauthorized
 from app.dto.data_filters import PlantingDataFilters
 from app.repo.crop_data import PlantingDataRepo
 from app.utils.logging import SharedLogger
 
-security = [{"jwt": []}]
-tag = Tag(name='AgWise', description="AgWise API")
+__bp__ = "/planting-data"
 
-api_v1 = APIBlueprint(
-    'api_v1',
-    __name__,
-    url_prefix='/api/v1',
-    # abp_tags=[tag],
-    # abp_security=security,
-    # disable openapi UI
-    doc_ui=True
-)
+url_prefix = API_PREFIX + API_VERSION + __bp__
 
-kvuno_tag = Tag(name="kvuno", description="Data serving API")
+# Define any security requirements or tags if needed
+tag = Tag(name="kvuno", description="Data serving API")
+
+api = APIBlueprint(__bp__, __name__, url_prefix=url_prefix, abp_tags=[tag])
 
 shared_logger = SharedLogger(level=logging.DEBUG)
 logger = shared_logger.get_logger()
 
-crop_data_repo = PlantingDataRepo()
+planting_data_repo = PlantingDataRepo()
 
 
-@api_v1.get("/crop-data",
-            tags=[kvuno_tag],
-            responses={200: CropRecordResponse, 401: Unauthorized}
-            )
+@api.get('/',
+         responses={200: CropRecordResponse, 401: Unauthorized})
 def get_data(query: PlantingDataFilters):
     page = int(request.args.get('page', default=1, type=int))
     per_page = int(request.args.get('per_page', default=50, type=int))
 
     try:
-        paginated_data = crop_data_repo.get_paginated_data(query, page, per_page)
+        paginated_data = planting_data_repo.get_paginated_data(query, page, per_page)
 
-        # Convert the result to a list of dictionaries for JSON serialization
         data = [PlantingDataRecord(
             coordinates=item.coordinates,
             country=item.country,
@@ -54,7 +45,6 @@ def get_data(query: PlantingDataFilters):
             check_sum=item.check_sum
         ).__dict__ for item in paginated_data.items]
 
-        # Format the paginated data as JSON
         response = {
             'data': data,
             'total': paginated_data.total,
@@ -66,5 +56,5 @@ def get_data(query: PlantingDataFilters):
         return jsonify(response), 200
 
     except Exception as e:
-        # Handle errors and return an appropriate response
+        logger.error(f"Error retrieving crop data: {e}")
         return jsonify({'error': str(e)}), 500

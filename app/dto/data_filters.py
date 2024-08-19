@@ -19,7 +19,7 @@ class CropDataFiltersBase:
     planting_option: Optional[int] = Field(None, description='Option for planting, typically an integer')
 
 
-class CropDataFilters(BaseModel, CropDataFiltersBase):
+class PlantingDataFilters(BaseModel, CropDataFiltersBase):
     model_config = ConfigDict(
         use_enum_values=True,
         str_strip_whitespace=True

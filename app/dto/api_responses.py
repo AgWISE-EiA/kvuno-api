@@ -17,7 +17,7 @@ class Coordinates(BaseModel):
 
 
 @dataclass
-class CropRecord:
+class PlantingDataRecord:
     coordinates: Coordinates
     country: Optional[str]
     province: Optional[str]
@@ -38,5 +38,5 @@ class Pagination(BaseModel):
 
 
 class CropRecordResponse(BaseModel):
-    data: List[CropRecord]
+    data: List[PlantingDataRecord]
     pagination: Pagination

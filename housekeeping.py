@@ -11,9 +11,9 @@ import pyreadr
 from dotenv import load_dotenv
 
 from app import create_app
-from app.dto.api_responses import CropRecord
+from app.dto.api_responses import PlantingDataRecord
 from app.models.kvuno import ProcessedFiles
-from app.repo.crop_data import CropDataRepo
+from app.repo.crop_data import PlantingDataRepo
 from app.repo.processed_files import ProcessedFilesRepo
 from app.utils import calculate_file_checksum
 from app.utils.logging import SharedLogger
@@ -26,7 +26,7 @@ logger = shared_logger.get_logger()
 app = create_app()
 
 processed_files_repo = ProcessedFilesRepo()
-crop_data_repo = CropDataRepo()
+crop_data_repo = PlantingDataRepo()
 
 
 def process_file(file_path: str, batch_size: int = 1000, chunk_size: int = 10000):
@@ -73,7 +73,7 @@ def process_file(file_path: str, batch_size: int = 1000, chunk_size: int = 10000
 
                 for index, row in chunk.iterrows():
                     logger.debug(f"Processing row {index} from {file_name}")
-                    record = CropRecord(
+                    record = PlantingDataRecord(
                         coordinates=row['XY'] if pd.notna(row['XY']) else None,
                         country=row['country'] if pd.notna(row['country']) else None,
                         province=row['province'] if pd.notna(row['province']) else None,

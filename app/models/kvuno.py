@@ -8,7 +8,7 @@ class Base(DeclarativeBase):
     pass
 
 
-class CropData(Base):
+class PlantingData(Base):
     __tablename__ = 'crop_data'
     __table_args__ = (
         Index('idx_check_sum', 'check_sum'),
