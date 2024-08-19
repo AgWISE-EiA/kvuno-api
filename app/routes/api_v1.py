@@ -5,7 +5,7 @@ from flask_openapi3 import APIBlueprint, Tag
 
 from app.dto.api_responses import PlantingDataRecord, CropRecordResponse, Pagination, Unauthorized
 from app.dto.data_filters import PlantingDataFilters
-from app.repo.crop_data import PlantingDataRepo
+from app.repo.planting_data import PlantingDataRepo
 from app.utils.logging import SharedLogger
 
 security = [{"jwt": []}]

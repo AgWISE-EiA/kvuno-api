@@ -5,7 +5,7 @@ from flask_openapi3 import Tag, APIBlueprint
 from app.config import API_PREFIX, API_VERSION
 from app.dto.api_responses import PlantingDataRecord, CropRecordResponse, Unauthorized
 from app.dto.data_filters import PlantingDataFilters
-from app.repo.crop_data import PlantingDataRepo
+from app.repo.planting_data import PlantingDataRepo
 from app.utils.logging import SharedLogger
 
 __bp__ = "/planting-data"

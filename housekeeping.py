@@ -13,7 +13,7 @@ from dotenv import load_dotenv
 from app import create_app
 from app.dto.api_responses import PlantingDataRecord
 from app.models.kvuno import ProcessedFiles
-from app.repo.crop_data import PlantingDataRepo
+from app.repo.planting_data import PlantingDataRepo
 from app.repo.processed_files import ProcessedFilesRepo
 from app.utils import calculate_file_checksum
 from app.utils.logging import SharedLogger
@@ -26,12 +26,12 @@ logger = shared_logger.get_logger()
 app = create_app()
 
 processed_files_repo = ProcessedFilesRepo()
-crop_data_repo = PlantingDataRepo()
+planting_data_repo = PlantingDataRepo()
 
 
 def process_file(file_path: str, batch_size: int = 1000, chunk_size: int = 10000):
     """
-    Processes a single file by reading its contents in chunks, converting data to `CropRecord` instances,
+    Processes a single file by reading its contents in chunks, converting data to `PlantingDataREcord` instances,
     and inserting records into the database. The file is only processed if its checksum is not
     already recorded in the processed_files repository.
 
@@ -88,14 +88,14 @@ def process_file(file_path: str, batch_size: int = 1000, chunk_size: int = 10000
                     crop_data_records.append(record)
 
                     if len(crop_data_records) >= batch_size:
-                        crop_data_repo.batch_insert(crop_data_records)
+                        planting_data_repo.batch_insert(crop_data_records)
                         logger.info(f"Processed batch of {len(crop_data_records)} records from {file_name}")
                         crop_data_records.clear()  # Clear the batch
 
             # Insert remaining records
             if crop_data_records:
                 logger.info(f"Inserting final batch of {len(crop_data_records)} records")
-                crop_data_repo.batch_insert(crop_data_records)
+                planting_data_repo.batch_insert(crop_data_records)
                 crop_data_records.clear()
 
             processed_file = ProcessedFiles(
@@ -147,5 +147,4 @@ def load_rds_to_db(data_folder: str, batch_size: int = 1000, chunk_size: int = 1
 
 if __name__ == '__main__':
     rds_folder = os.path.join("static/", 'data')
-    load_rds_to_db(data_folder=rds_folder, batch_size=1500, chunk_size=20000)
-
+    load_rds_to_db(data_folder=rds_folder, batch_size=2000, chunk_size=10000)
