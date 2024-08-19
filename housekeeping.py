@@ -11,7 +11,7 @@ import pyreadr
 from dotenv import load_dotenv
 
 from app import create_app
-from app.dto.api_responses import PlantingDataRecord
+from app.dto.planting_data_resp import PlantingDataRecord
 from app.models.kvuno import ProcessedFiles
 from app.repo.planting_data import PlantingDataRepo
 from app.repo.processed_files import ProcessedFilesRepo

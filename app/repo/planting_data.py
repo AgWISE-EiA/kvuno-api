@@ -4,7 +4,7 @@ from typing import Optional, List, Type
 from flask_sqlalchemy.pagination import QueryPagination
 from sqlalchemy.orm import Query
 
-from app.dto.api_responses import PlantingDataRecord
+from app.dto.planting_data_resp import PlantingDataRecord
 from app.dto.data_filters import PlantingDataFilter
 from app.models.database_conn import MyDb
 from app.models.kvuno import PlantingData
