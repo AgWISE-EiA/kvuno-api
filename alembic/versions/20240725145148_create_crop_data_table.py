@@ -10,6 +10,8 @@ from typing import Sequence, Union
 import sqlalchemy as sa
 from alembic import op
 
+from app.utils.migration_utils import get_integer_column_type
+
 # revision identifiers, used by Alembic.
 revision: str = 'aa7eb765e5d3'
 down_revision: Union[str, None] = 'feb6bf4b7abb'
@@ -22,8 +24,8 @@ table_name = 'crop_data'
 def upgrade() -> None:
     op.create_table(
         f"{table_name}",
-        sa.Column('id', sa.BigInteger, primary_key=True),
-        sa.Column('coordinates', sa.String(50), nullable=True,comment='Coordinates of the crop xy'),
+        sa.Column('id', get_integer_column_type(), primary_key=True),
+        sa.Column('coordinates', sa.String(50), nullable=True, comment='Coordinates of the crop xy'),
         sa.Column('country', sa.String(20), nullable=True),
         sa.Column('province', sa.String(20), nullable=True),
         sa.Column('lon', sa.String(10), nullable=True),
