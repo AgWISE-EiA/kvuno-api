@@ -1,4 +1,4 @@
-from flask import Blueprint, request, jsonify
+from flask import jsonify
 from flask_openapi3 import Tag, APIBlueprint
 
 from app.config import API_PREFIX, API_VERSION

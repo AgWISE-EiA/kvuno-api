@@ -2,8 +2,6 @@ from dataclasses import dataclass
 from typing import Optional
 
 from pydantic import BaseModel, Field, ConfigDict
-from typing import Optional
-from dataclasses import dataclass, field as dataclass_field
 
 
 @dataclass

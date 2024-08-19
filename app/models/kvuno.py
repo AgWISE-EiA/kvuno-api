@@ -1,8 +1,9 @@
+import datetime
 from typing import Optional
 
 from sqlalchemy import BigInteger, DateTime, Index, Integer, String, text
 from sqlalchemy.orm import DeclarativeBase, Mapped, mapped_column
-import datetime
+
 
 class Base(DeclarativeBase):
     pass

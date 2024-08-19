@@ -1,9 +1,8 @@
-from typing import Optional, List
+from dataclasses import dataclass
+from typing import List
+from typing import Optional
 
 from pydantic import Field, BaseModel
-
-from dataclasses import dataclass
-from typing import Optional
 
 
 class Unauthorized(BaseModel):

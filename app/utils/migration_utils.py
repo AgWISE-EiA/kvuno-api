@@ -1,5 +1,6 @@
-from sqlalchemy import Integer, BigInteger
 from alembic import op
+from sqlalchemy import Integer, BigInteger
+
 
 def get_integer_column_type():
     """

@@ -1,15 +1,13 @@
 import os
-import importlib
-import traceback
-import re
-from dotenv import load_dotenv
-from flask_openapi3 import OpenAPI, Server, Contact, License, Info
-from flask_cors import CORS
 
-from . import config
+from dotenv import load_dotenv
+from flask_cors import CORS
+from flask_openapi3 import OpenAPI, Server, Contact, License, Info
+
 from app.models.database_conn import MyDb
 from app.routes.api_v1 import api_v1
 from app.routes.main import register_app_routes
+from . import config
 
 # Load environment variables from .env file
 load_dotenv()

@@ -1,5 +1,6 @@
 import logging
-from flask import Blueprint, request, jsonify
+
+from flask import request, jsonify
 from flask_openapi3 import Tag, APIBlueprint
 
 from app.config import API_PREFIX, API_VERSION

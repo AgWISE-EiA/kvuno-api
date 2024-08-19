@@ -3,7 +3,7 @@ import logging
 from flask import request, jsonify
 from flask_openapi3 import APIBlueprint, Tag
 
-from app.dto.api_responses import PlantingDataRecord, CropRecordResponse, Pagination, Unauthorized
+from app.dto.api_responses import PlantingDataRecord, CropRecordResponse, Unauthorized
 from app.dto.data_filters import PlantingDataFilter
 from app.repo.planting_data import PlantingDataRepo
 from app.utils.logging import SharedLogger
