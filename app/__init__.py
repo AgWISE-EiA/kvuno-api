@@ -6,7 +6,7 @@ from flask_cors import CORS
 
 from app.models.database_conn import MyDb
 from app.routes.api_v1 import api_v1
-from app.routes.app_routes import register_app_routes
+from app.routes.main import register_app_routes
 
 load_dotenv()
 contact = Contact(name="Munywele Sammy", email="sammy@munywele.co.ke", url="https://munywele.co.ke")
