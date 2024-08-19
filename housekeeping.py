@@ -11,7 +11,7 @@ import pyreadr
 from dotenv import load_dotenv
 
 from app import create_app
-from app.dto.data_class import CropRecord
+from app.dto.api_responses import CropRecord
 from app.models.kvuno import ProcessedFiles
 from app.repo.crop_data import CropDataRepo
 from app.repo.processed_files import ProcessedFilesRepo

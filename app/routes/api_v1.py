@@ -3,7 +3,7 @@ import logging
 from flask import request, jsonify
 from flask_openapi3 import APIBlueprint, Tag
 
-from app.dto.data_class import CropRecord
+from app.dto.api_responses import CropRecord, CropRecordResponse, Pagination, Unauthorized
 from app.dto.data_filters import CropDataFilters
 from app.repo.crop_data import CropDataRepo
 from app.utils.logging import SharedLogger
@@ -29,26 +29,16 @@ logger = shared_logger.get_logger()
 crop_data_repo = CropDataRepo()
 
 
-@api_v1.get("/crop-data", tags=[kvuno_tag])
-def get_data():
-    # Get filters, page, and per_page from query parameters
-    filters = CropDataFilters(
-        coordinates=request.args.get('coordinates'),
-        country=request.args.get('country'),
-        province=request.args.get('province'),
-        lon=request.args.get('lon'),
-        lat=request.args.get('lat'),
-        variety=request.args.get('variety'),
-        season_type=request.args.get('season_type'),
-        opt_date=request.args.get('opt_date'),
-        planting_option=request.args.get('planting_option', type=int),
-        check_sum=request.args.get('check_sum')
-    )
+@api_v1.get("/crop-data",
+            tags=[kvuno_tag],
+            responses={200: CropRecordResponse, 401: Unauthorized}
+            )
+def get_data(query: CropDataFilters):
     page = int(request.args.get('page', default=1, type=int))
     per_page = int(request.args.get('per_page', default=50, type=int))
 
     try:
-        paginated_data = crop_data_repo.get_paginated_data(filters, page, per_page)
+        paginated_data = crop_data_repo.get_paginated_data(query, page, per_page)
 
         # Convert the result to a list of dictionaries for JSON serialization
         data = [CropRecord(

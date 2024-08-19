@@ -31,6 +31,23 @@ files = [
 ]
 
 [[package]]
+name = "asgiref"
+version = "3.8.1"
+description = "ASGI specs, helper code, and adapters"
+optional = false
+python-versions = ">=3.8"
+files = [
+    {file = "asgiref-3.8.1-py3-none-any.whl", hash = "sha256:3e1e3ecc849832fe52ccf2cb6686b7a55f82bb1d6aee72a58826471390335e47"},
+    {file = "asgiref-3.8.1.tar.gz", hash = "sha256:c343bd80a0bec947a9860adb4c432ffa7db769836c64238fc34bdc3fec84d590"},
+]
+
+[package.dependencies]
+typing-extensions = {version = ">=4", markers = "python_version < \"3.11\""}
+
+[package.extras]
+tests = ["mypy (>=0.800)", "pytest", "pytest-asyncio"]
+
+[[package]]
 name = "astroid"
 version = "3.2.4"
 description = "An abstract syntax tree for Python with inference support."
@@ -191,6 +208,27 @@ async = ["asgiref (>=3.2)"]
 dotenv = ["python-dotenv"]
 email = ["email-validator"]
 yaml = ["pyyaml"]
+
+[[package]]
+name = "flask-pydantic-api"
+version = "1.2.0"
+description = "Pydantic based API support for Flask"
+optional = false
+python-versions = "*"
+files = [
+    {file = "flask_pydantic_api-1.2.0-py3-none-any.whl", hash = "sha256:262d5bd5e0ed2d41aa68eceb803af89f9b2998ec92ad5a5b9c953b3f5c68fd30"},
+    {file = "flask_pydantic_api-1.2.0.tar.gz", hash = "sha256:a18f9e6aef5bb281f3367389e2427ced8131d9ec475f5afa89288a95ceacca1f"},
+]
+
+[package.dependencies]
+asgiref = ">=3.6"
+flask = ">=2.2"
+pydantic = ">=2.5"
+
+[package.extras]
+dev = ["black", "flake8", "flake8-bugbear", "flake8-debugger", "ipdb", "isort", "mypy", "types-setuptools"]
+serializer = ["pydantic-enhanced-serializer (>=2)"]
+test = ["pytest", "pytest-cov"]
 
 [[package]]
 name = "flask-sqlalchemy"
@@ -1321,4 +1359,4 @@ files = [
 [metadata]
 lock-version = "2.0"
 python-versions = "^3.10"
-content-hash = "a0afe8845545e3c8be5e1fabdab0525f755c3fd7f70550051c020920b56121a5"
+content-hash = "02ba140f85f4900e55edaa573c815b3edfbbac6e2c47df0504c33ca6645e4f4a"

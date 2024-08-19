@@ -4,7 +4,7 @@ from typing import Optional, List, Type
 from flask_sqlalchemy.pagination import QueryPagination
 from sqlalchemy.orm import Query
 
-from app.dto.data_class import CropRecord
+from app.dto.api_responses import CropRecord
 from app.dto.data_filters import CropDataFilters
 from app.models.database_conn import MyDb
 from app.models.kvuno import CropData
