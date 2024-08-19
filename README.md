@@ -15,9 +15,9 @@ The project uses SQLAlchemy for database interactions and Alembic for database m
 - **`routes.py`**: Defines the application's routes and handlers.
 - **`config.py`**: Contains configuration settings for different environments.
 - **`models/`**: Package for SQLAlchemy models.
-  - **`__init__.py`**: Initializes the models package.
-  - **`base.py`**: Contains the base class for SQLAlchemy models.
-  - **`models.py`**: Defines database models.
+    - **`__init__.py`**: Initializes the models package.
+    - **`base.py`**: Contains the base class for SQLAlchemy models.
+    - **`models.py`**: Defines database models.
 
 ### `migrations/`
 
