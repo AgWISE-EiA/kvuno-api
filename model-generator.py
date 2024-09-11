@@ -71,7 +71,7 @@ def run_sqlacodegen():
     # Read environment variables
     db_url = os.getenv('DB_URL')
     outfile_path = os.getenv('OUTFILE_PATH', 'app/models/kvuno.py')
-    excluded_tables = os.getenv('EXCLUDED_TABLES', 'spatial_ref_sys').split(',')
+    excluded_tables = os.getenv('EXCLUDED_TABLES', 'spatial_ref_sys,alembic_version').split(',')
 
     # Create dummy file
     create_dummy_file(outfile_path)
@@ -88,6 +88,7 @@ def run_sqlacodegen():
             logger.warning("No tables left to generate models after exclusions.")
             exit(100)
 
+        logger.info(f"Generating tables in schema: {included_tables}")
         # Construct the command to generate models for the included tables
         command = [
             'sqlacodegen',
