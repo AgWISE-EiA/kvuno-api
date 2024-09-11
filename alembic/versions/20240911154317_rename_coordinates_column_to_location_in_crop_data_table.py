@@ -1,18 +1,18 @@
-"""rename coordinates column in crop_data table
+"""rename coordinates column to location in crop_data table
 
-Revision ID: fc489038eca1
-Revises: fdc3e8e457b6
-Create Date: 2024-09-10 12:33:10.801452
+Revision ID: b7563067360f
+Revises: bfdf78c29e9e
+Create Date: 2024-09-11 15:43:17.382272
 
 """
 from typing import Sequence, Union
-
 import sqlalchemy as sa
 from alembic import op
 
+
 # revision identifiers, used by Alembic.
-revision: str = 'fc489038eca1'
-down_revision: Union[str, None] = 'fdc3e8e457b6'
+revision: str = 'b7563067360f'
+down_revision: Union[str, None] = 'bfdf78c29e9e'
 branch_labels: Union[str, Sequence[str], None] = None
 depends_on: Union[str, Sequence[str], None] = None
 
