@@ -16,41 +16,43 @@ def create_dummy_file(filepath):
     Args:
         filepath (str): The path to the file to be created.
     """
-    os.makedirs(os.path.dirname(filepath), exist_ok=True)
-    with open(filepath, 'w', encoding='UTF-8') as f:
-        f.write("# This is a dummy ORM file\n")
-        f.write("# Replace this content with generated ORM code\n")
+    try:
+        os.makedirs(os.path.dirname(filepath), exist_ok=True)
+        with open(filepath, 'w', encoding='UTF-8') as f:
+            f.write("# This is a dummy ORM file\n")
+            f.write("# Replace this content with generated ORM code\n")
+        logger.info(f"Dummy file created at {filepath}")
+    except OSError as e:
+        logger.error(f"Failed to create dummy file at {filepath}: {e}")
+        raise
 
 
-def get_tables_in_schema():
+def get_tables_in_schema(db_url):
     """
     Retrieve the list of tables in the database schema.
 
-    Reads the database URL from environment variables, connects to the database,
-    and returns the list of table names in the current schema.
+    Args:
+        db_url (str): The database connection URL.
 
     Returns:
         list: A list of table names in the schema.
     """
-    db_url = os.getenv('DB_URL')
+    try:
+        # Create the database engine
+        engine = create_engine(db_url)
 
-    if not db_url:
-        raise ValueError("DB_URL environment variable is not set")
+        # Reflect the database schema
+        metadata = MetaData()
+        metadata.reflect(bind=engine)
 
-    # Create the database engine
-    engine = create_engine(db_url)
+        # Get the list of tables
+        tables = list(metadata.tables.keys())
+        logger.debug(f"Tables in schema: {tables}")
 
-    # Reflect the database schema
-    metadata = MetaData()
-    metadata.reflect(bind=engine)
-
-    # Get the list of tables
-    tables = list(metadata.tables.keys())
-
-    # Log the table names
-    logger.info(f"Tables in schema: {tables}")
-
-    return tables
+        return tables
+    except Exception as e:
+        logger.error(f"Failed to retrieve tables from schema: {e}")
+        raise
 
 
 def run_sqlacodegen():
@@ -70,6 +72,10 @@ def run_sqlacodegen():
     """
     # Read environment variables
     db_url = os.getenv('DB_URL')
+    if not db_url:
+        logger.error("DB_URL environment variable is not set")
+        raise ValueError("DB_URL environment variable is not set")
+
     outfile_path = os.getenv('OUTFILE_PATH', 'app/models/kvuno.py')
     excluded_tables = os.getenv('EXCLUDED_TABLES', 'spatial_ref_sys,alembic_version').split(',')
 
@@ -78,8 +84,7 @@ def run_sqlacodegen():
 
     try:
         # Get all tables from the database
-
-        all_tables = get_tables_in_schema()
+        all_tables = get_tables_in_schema(db_url)
 
         # Filter out excluded tables
         included_tables = [table for table in all_tables if table not in excluded_tables]
@@ -88,7 +93,8 @@ def run_sqlacodegen():
             logger.warning("No tables left to generate models after exclusions.")
             exit(100)
 
-        logger.info(f"Generating tables in schema: {included_tables}")
+        logger.info(f"Generating models for tables: {included_tables}")
+
         # Construct the command to generate models for the included tables
         command = [
             'sqlacodegen',
@@ -101,10 +107,14 @@ def run_sqlacodegen():
 
         result = subprocess.run(command, check=True, capture_output=True, text=True)
         logger.info("Output:\n" + result.stdout)
-        logger.error("Errors:\n" + result.stderr)
+        if result.stderr:
+            logger.error("Errors:\n" + result.stderr)
     except subprocess.CalledProcessError as e:
-        logger.error(f"An error occurred: {e}")
+        logger.error(f"sqlacodegen failed with error: {e}")
         raise RuntimeError(f"sqlacodegen failed: {e}") from e
+    except Exception as e:
+        logger.error(f"An unexpected error occurred: {e}")
+        raise
 
 
 if __name__ == "__main__":

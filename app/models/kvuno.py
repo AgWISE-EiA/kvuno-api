@@ -1,9 +1,10 @@
+import datetime
 from typing import Any, Optional
 
 from geoalchemy2.types import Geometry
 from sqlalchemy import BigInteger, DateTime, Index, Integer, PrimaryKeyConstraint, String, UniqueConstraint, text
 from sqlalchemy.orm import DeclarativeBase, Mapped, mapped_column
-import datetime
+
 
 class Base(DeclarativeBase):
     pass
@@ -42,7 +43,8 @@ class CropData(Base):
     planting_option: Mapped[Optional[int]] = mapped_column(Integer)
     created_at: Mapped[Optional[datetime.datetime]] = mapped_column(DateTime, server_default=text('now()'))
     updated_at: Mapped[Optional[datetime.datetime]] = mapped_column(DateTime, server_default=text('now()'))
-    coordinates: Mapped[Optional[Any]] = mapped_column(Geometry('POINT', 4326, from_text='ST_GeomFromEWKT', name='geometry'))
+    coordinates: Mapped[Optional[Any]] = mapped_column(
+        Geometry('POINT', 4326, from_text='ST_GeomFromEWKT', name='geometry'))
 
 
 class ProcessedFiles(Base):
