@@ -3,7 +3,7 @@ from typing import Optional
 
 from pydantic import BaseModel, Field, ConfigDict
 
-from app.dto.planting_data_resp import Coordinates
+from app.dto.crop_data_resp import Coordinates
 
 
 @dataclass

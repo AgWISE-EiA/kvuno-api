@@ -4,9 +4,9 @@ from flask import request, jsonify
 from flask_openapi3 import Tag, APIBlueprint
 
 from app.config import API_PREFIX, API_VERSION
-from app.dto.planting_data_resp import PlantingDataRecord, CropRecordResponse, Unauthorized
+from app.dto.crop_data_resp import CropDataRecord, CropRecordResponse, Unauthorized
 from app.dto.data_filters import PlantingDataFilter
-from app.repo.planting_data import PlantingDataRepo
+from app.repo.crop_data import CropDataRepo
 from app.utils.logging import SharedLogger
 
 __bp__ = "/planting-data"
@@ -21,7 +21,7 @@ api = APIBlueprint(__bp__, __name__, url_prefix=url_prefix, abp_tags=[tag])
 shared_logger = SharedLogger(level=logging.DEBUG)
 logger = shared_logger.get_logger()
 
-planting_data_repo = PlantingDataRepo()
+planting_data_repo = CropDataRepo()
 
 
 @api.get('/',
@@ -33,7 +33,7 @@ def get_data(query: PlantingDataFilter):
     try:
         paginated_data = planting_data_repo.get_paginated_data(query, page, per_page)
 
-        data = [PlantingDataRecord(
+        data = [CropDataRecord(
             coordinates=item.coordinates,
             country=item.country,
             province=item.province,

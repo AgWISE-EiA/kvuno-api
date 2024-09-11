@@ -11,9 +11,9 @@ import pyreadr
 from dotenv import load_dotenv
 
 from app import create_app
-from app.dto.planting_data_resp import PlantingDataRecord
+from app.dto.crop_data_resp import CropDataRecord
 from app.models.kvuno import ProcessedFiles
-from app.repo.planting_data import PlantingDataRepo
+from app.repo.crop_data import CropDataRepo
 from app.repo.processed_files import ProcessedFilesRepo
 from app.utils import calculate_file_checksum
 from app.utils.logging import SharedLogger
@@ -26,7 +26,7 @@ logger = shared_logger.get_logger()
 app = create_app()
 
 processed_files_repo = ProcessedFilesRepo()
-planting_data_repo = PlantingDataRepo()
+crop_data_repo = CropDataRepo()
 
 
 def process_file(file_path: str, batch_size: int = 1000, chunk_size: int = 10000):
@@ -73,7 +73,7 @@ def process_file(file_path: str, batch_size: int = 1000, chunk_size: int = 10000
 
                 for index, row in chunk.iterrows():
                     logger.debug(f"Processing row {index} from {file_name}")
-                    record = PlantingDataRecord(
+                    record = CropDataRecord(
                         coordinates=row['XY'] if pd.notna(row['XY']) else None,
                         country=row['country'] if pd.notna(row['country']) else None,
                         province=row['province'] if pd.notna(row['province']) else None,
@@ -88,14 +88,14 @@ def process_file(file_path: str, batch_size: int = 1000, chunk_size: int = 10000
                     crop_data_records.append(record)
 
                     if len(crop_data_records) >= batch_size:
-                        planting_data_repo.batch_insert(crop_data_records)
+                        crop_data_repo.batch_insert(crop_data_records)
                         logger.info(f"Processed batch of {len(crop_data_records)} records from {file_name}")
                         crop_data_records.clear()  # Clear the batch
 
             # Insert remaining records
             if crop_data_records:
                 logger.info(f"Inserting final batch of {len(crop_data_records)} records")
-                planting_data_repo.batch_insert(crop_data_records)
+                crop_data_repo.batch_insert(crop_data_records)
                 crop_data_records.clear()
 
             processed_file = ProcessedFiles(

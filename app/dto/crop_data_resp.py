@@ -1,6 +1,8 @@
 from dataclasses import dataclass
 from typing import List
 from typing import Optional
+from geoalchemy2 import Geometry
+
 
 from pydantic import Field, BaseModel
 
@@ -16,8 +18,8 @@ class Coordinates(BaseModel):
 
 
 @dataclass
-class PlantingDataRecord:
-    coordinates: Optional[str]
+class CropDataRecord:
+    coordinates: Optional[Geometry]
     country: Optional[str]
     province: Optional[str]
     lon: Optional[str]
@@ -37,5 +39,5 @@ class Pagination(BaseModel):
 
 
 class CropRecordResponse(BaseModel):
-    data: List[PlantingDataRecord]
+    data: List[CropDataRecord]
     pagination: Pagination
