@@ -15,9 +15,12 @@ down_revision: Union[str, None] = '430cc2e94c1e'
 branch_labels: Union[str, Sequence[str], None] = None
 depends_on: Union[str, Sequence[str], None] = None
 
+table_name = 'crop_data'
+
 
 def upgrade() -> None:
-    op.create_index('ix_crop_data_coordinates', 'crop_data', ['coordinates'])
+    op.create_index(index_name='idx_coordinates', table_name=table_name,
+                    columns=['coordinates'], postgresql_using='gist')
     op.create_index('ix_crop_data_country', 'crop_data', ['country'])
     op.create_index('ix_crop_data_province', 'crop_data', ['province'])
     op.create_index('ix_crop_data_lon', 'crop_data', ['lon'])
@@ -30,13 +33,13 @@ def upgrade() -> None:
 
 
 def downgrade() -> None:
-    op.drop_index('ix_crop_data_coordinates', table_name='crop_data')
-    op.drop_index('ix_crop_data_country', table_name='crop_data')
-    op.drop_index('ix_crop_data_province', table_name='crop_data')
-    op.drop_index('ix_crop_data_lon', table_name='crop_data')
-    op.drop_index('ix_crop_data_lat', table_name='crop_data')
-    op.drop_index('ix_crop_data_variety', table_name='crop_data')
-    op.drop_index('ix_crop_data_season_type', table_name='crop_data')
-    op.drop_index('ix_crop_data_opt_date', table_name='crop_data')
-    op.drop_index('ix_crop_data_planting_option', table_name='crop_data')
-    op.drop_index('ix_crop_data_check_sum', table_name='crop_data')
+    op.drop_index('ix_coordinates', table_name=table_name)
+    op.drop_index('ix_crop_data_country', table_name=table_name)
+    op.drop_index('ix_crop_data_province', table_name=table_name)
+    op.drop_index('ix_crop_data_lon', table_name=table_name)
+    op.drop_index('ix_crop_data_lat', table_name=table_name)
+    op.drop_index('ix_crop_data_variety', table_name=table_name)
+    op.drop_index('ix_crop_data_season_type', table_name=table_name)
+    op.drop_index('ix_crop_data_opt_date', table_name=table_name)
+    op.drop_index('ix_crop_data_planting_option', table_name=table_name)
+    op.drop_index('ix_crop_data_check_sum', table_name=table_name)
