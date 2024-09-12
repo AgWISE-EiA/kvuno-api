@@ -17,6 +17,7 @@ from app.repo.crop_data import CropDataRepo
 from app.repo.processed_files import ProcessedFilesRepo
 from app.utils import calculate_file_checksum
 from app.utils.logging import SharedLogger
+from geoalchemy2 import WKTElement
 
 # Load environment variables from .env file
 load_dotenv()
@@ -73,19 +74,22 @@ def process_file(file_path: str, batch_size: int = 1000, chunk_size: int = 10000
 
                 for index, row in chunk.iterrows():
                     logger.debug(f"Processing row {index} from {file_name}")
-                    record = CropDataRecord(
-                        coordinates=row['XY'] if pd.notna(row['XY']) else None,
-                        country=row['country'] if pd.notna(row['country']) else None,
-                        province=row['province'] if pd.notna(row['province']) else None,
-                        lon=row['lon'] if pd.notna(row['lon']) else None,
-                        lat=row['lat'] if pd.notna(row['lat']) else None,
-                        variety=row['Variety'] if pd.notna(row['Variety']) else None,
-                        season_type=row['Season_type'] if pd.notna(row['Season_type']) else None,
-                        opt_date=row['Opt_date'] if pd.notna(row['Opt_date']) else None,
-                        planting_option=int(row['Planting_Option']) if pd.notna(row['Planting_Option']) else None,
-                        check_sum=checksum
-                    )
-                    crop_data_records.append(record)
+                    coordinates = row['XY'] if pd.notna(row['XY']) else None
+                    if coordinates:
+                        record = CropDataRecord(
+                            country=row['country'] if pd.notna(row['country']) else None,
+                            province=row['province'] if pd.notna(row['province']) else None,
+                            lon=row['lon'] if pd.notna(row['lon']) else None,
+                            lat=row['lat'] if pd.notna(row['lat']) else None,
+                            variety=row['Variety'] if pd.notna(row['Variety']) else None,
+                            season_type=row['Season_type'] if pd.notna(row['Season_type']) else None,
+                            opt_date=row['Opt_date'] if pd.notna(row['Opt_date']) else None,
+                            planting_option=int(row['Planting_Option']) if pd.notna(row['Planting_Option']) else None,
+                            check_sum=checksum
+                        )
+                        crop_data_records.append(record)
+                    else:
+                        logger.warning(f"Skipping row {index} from {file_name} due to empty coordinates")
 
                     if len(crop_data_records) >= batch_size:
                         crop_data_repo.batch_insert(crop_data_records)

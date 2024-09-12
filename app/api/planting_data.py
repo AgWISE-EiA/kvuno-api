@@ -34,7 +34,6 @@ def get_data(query: PlantingDataFilter):
         paginated_data = planting_data_repo.get_paginated_data(query, page, per_page)
 
         data = [CropDataRecord(
-            coordinates=item.coordinates,
             country=item.country,
             province=item.province,
             lon=item.lon,

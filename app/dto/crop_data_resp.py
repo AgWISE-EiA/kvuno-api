@@ -1,8 +1,4 @@
-from dataclasses import dataclass
-from typing import List
-from typing import Optional
-from geoalchemy2 import Geometry
-
+from typing import List, Optional
 
 from pydantic import Field, BaseModel
 
@@ -13,22 +9,24 @@ class Unauthorized(BaseModel):
 
 
 class Coordinates(BaseModel):
-    lat: str
-    lon: str
+    lat: float
+    lon: float
 
 
-@dataclass
-class CropDataRecord:
-    coordinates: Optional[Geometry]
+class CropDataRecord(BaseModel):
+    lat: Optional[float]  # Latitude as float
+    lon: Optional[float]  # Longitude as float
     country: Optional[str]
     province: Optional[str]
-    lon: Optional[str]
-    lat: Optional[str]
     variety: Optional[str]
     season_type: Optional[str]
     opt_date: Optional[str]
     planting_option: Optional[int]
     check_sum: Optional[str]
+
+    # class Config:
+    #     orm_mode = True  # Ensures compatibility with ORM models if needed
+    #
 
 
 class Pagination(BaseModel):

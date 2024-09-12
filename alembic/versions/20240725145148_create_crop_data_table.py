@@ -8,8 +8,8 @@ Create Date: 2024-07-25 14:51:48.084926
 from typing import Sequence, Union
 
 import sqlalchemy as sa
-from geoalchemy2 import Geometry
 from alembic import op
+from geoalchemy2 import Geometry
 
 from app.utils.migration_utils import get_integer_column_type
 
@@ -23,12 +23,16 @@ table_name = 'crop_data'
 
 
 def upgrade() -> None:
+    # Ensure PostGIS extension is available
+    op.execute("CREATE EXTENSION IF NOT EXISTS postgis")
+
     op.create_table(
         f"{table_name}",
         sa.Column('id', get_integer_column_type(), primary_key=True),
         sa.Column('country', sa.String(20), nullable=True),
         sa.Column('province', sa.String(20), nullable=True),
-        sa.Column('coordinates', Geometry('POINT', srid=4326), nullable=True),  # Geometry column for coordinates
+        sa.Column('coordinates', Geometry('POINT', srid=4326), nullable=False),
+        # op.add_column(table_name, sa.Column('coordinates', Geometry(geometry_type='POINT', srid=4326)))
         sa.Column('lon', sa.Float(10), nullable=True),
         sa.Column('lat', sa.Float(10), nullable=True),
         sa.Column('variety', sa.String(20), nullable=True),
@@ -40,5 +44,6 @@ def upgrade() -> None:
         sa.Column('updated_at', sa.DateTime, server_default=sa.func.now())
     )
 
-    def downgrade() -> None:
-        op.drop_table(f"{table_name}", )
+
+def downgrade() -> None:
+    op.drop_table(f"{table_name}", )

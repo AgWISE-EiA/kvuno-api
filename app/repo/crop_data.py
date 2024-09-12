@@ -1,10 +1,13 @@
 import logging
 from typing import Optional, List, Type
 
-from app.dto.crop_data_resp import CropDataRecord
 from flask_sqlalchemy.pagination import QueryPagination
+from geoalchemy2 import WKTElement
+from geoalchemy2.functions import ST_DWithin
+from sqlalchemy.exc import SQLAlchemyError
 from sqlalchemy.orm import Query
 
+from app.dto.crop_data_resp import CropDataRecord
 from app.dto.data_filters import PlantingDataFilter
 from app.models.database_conn import MyDb
 from app.models.kvuno import CropData
@@ -67,16 +70,19 @@ class CropDataRepo:
         query = session.query(CropData)
 
         if filters.coordinates:
-            query = query.filter(CropData.coordinates == filters.coordinates)
+            lon_str, lat_str = filters.coordinates.split(',')
+            point = WKTElement(f'POINT({lon_str} {lat_str})', srid=4326)
+
+            # Query records that are within the specified distance from the point
+            query = (
+                session.query(CropData)
+                .filter(ST_DWithin(CropData.coordinates, point, filters.radius))
+            )
         if filters.country:
             query = query.filter(CropData.country == filters.country)
         if filters.province:
             # Perform partial search for province
             query = query.filter(CropData.province.ilike(f"%{filters.province}%"))
-        if filters.lon:
-            query = query.filter(CropData.lon == filters.lon)
-        if filters.lat:
-            query = query.filter(CropData.lat == filters.lat)
         if filters.variety:
             query = query.filter(CropData.variety == filters.variety)
         if filters.season_type:
@@ -128,13 +134,32 @@ class CropDataRepo:
             raise
 
     def batch_insert(self, crop_data: List[CropDataRecord]) -> None:
+        if not crop_data:
+            self.logger.warning("No records to insert.")
+            return
+
         session = self._get_session()
         try:
-            mappings = [record.__dict__ for record in crop_data]
+            # Prepare the data for insertion
+            mappings = [
+                {
+                    **record.__dict__,
+                    'coordinates': WKTElement(f"POINT({record.lon} {record.lat})", srid=4326)
+                    if record.lat and record.lon
+                    else None
+                }
+                for record in crop_data
+            ]
+
+            # Perform the bulk insert
             session.bulk_insert_mappings(CropData, mappings)
             session.commit()
-            self.logger.info(f"Batch inserted {len(crop_data)} PlantingData records")
+            self.logger.info(f"Batch inserted {len(crop_data)} CropData records")
+        except SQLAlchemyError as e:
+            session.rollback()
+            self.logger.error(f"Failed to batch insert CropData records: {e}")
+            raise
         except Exception as e:
             session.rollback()
-            self.logger.error(f"Failed to batch insert PlantingData records: {e}")
+            self.logger.error(f"An unexpected error occurred: {e}")
             raise
