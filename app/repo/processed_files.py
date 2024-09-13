@@ -1,8 +1,6 @@
 import logging
 from typing import Optional, List, Type
 
-from sqlalchemy.orm import sessionmaker
-
 from app.models.database_conn import MyDb
 from app.models.kvuno import ProcessedFiles
 from app.utils.logging import SharedLogger
