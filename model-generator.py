@@ -1,24 +1,9 @@
-"""
-model-generator.py
-
-This module generates model files based on the provided database schema or configuration.
-
-It includes functionalities for:
-- Loading environment variables from a `.env` file.
-- Creating a dummy file with placeholder content if necessary.
-- Running the `sqlacodegen` command to generate model classes from the database schema.
-- Handling subprocess errors and logging output and errors.
-
-Usage:
-    Run this module to generate models from specified database schemas using the `sqlacodegen` tool.
-    Ensure that the environment variables `DB_URL` and `OUTFILE_PATH` are set correctly.
-"""
-
 import os
 import subprocess
 
 from dotenv import load_dotenv
 from loguru import logger
+from sqlalchemy import create_engine, MetaData
 
 # Load environment variables from .env file
 load_dotenv()
@@ -31,10 +16,43 @@ def create_dummy_file(filepath):
     Args:
         filepath (str): The path to the file to be created.
     """
-    os.makedirs(os.path.dirname(filepath), exist_ok=True)
-    with open(filepath, 'w', encoding='UTF-8') as f:
-        f.write("# This is a dummy ORM file\n")
-        f.write("# Replace this content with generated ORM code\n")
+    try:
+        os.makedirs(os.path.dirname(filepath), exist_ok=True)
+        with open(filepath, 'w', encoding='UTF-8') as f:
+            f.write("# This is a dummy ORM file\n")
+            f.write("# Replace this content with generated ORM code\n")
+        logger.info(f"Dummy file created at {filepath}")
+    except OSError as e:
+        logger.error(f"Failed to create dummy file at {filepath}: {e}")
+        raise
+
+
+def get_tables_in_schema(db_url):
+    """
+    Retrieve the list of tables in the database schema.
+
+    Args:
+        db_url (str): The database connection URL.
+
+    Returns:
+        list: A list of table names in the schema.
+    """
+    try:
+        # Create the database engine
+        engine = create_engine(db_url)
+
+        # Reflect the database schema
+        metadata = MetaData()
+        metadata.reflect(bind=engine)
+
+        # Get the list of tables
+        tables = list(metadata.tables.keys())
+        logger.debug(f"Tables in schema: {tables}")
+
+        return tables
+    except Exception as e:
+        logger.error(f"Failed to retrieve tables from schema: {e}")
+        raise
 
 
 def run_sqlacodegen():
@@ -47,32 +65,56 @@ def run_sqlacodegen():
     Environment Variables:
         - DB_URL: The database connection URL.
         - OUTFILE_PATH: The path where the generated model file will be saved (default: 'app/models/kvuno.py').
+        - EXCLUDED_TABLES: Comma-separated names of tables to exclude from generation.
 
     Raises:
         RuntimeError: If the sqlacodegen command fails.
     """
     # Read environment variables
     db_url = os.getenv('DB_URL')
+    if not db_url:
+        logger.error("DB_URL environment variable is not set")
+        raise ValueError("DB_URL environment variable is not set")
+
     outfile_path = os.getenv('OUTFILE_PATH', 'app/models/kvuno.py')
+    excluded_tables = os.getenv('EXCLUDED_TABLES', 'spatial_ref_sys,alembic_version').split(',')
 
     # Create dummy file
     create_dummy_file(outfile_path)
 
-    # Construct the command
-    command = [
-        'sqlacodegen',
-        db_url,
-        '--outfile',
-        outfile_path
-    ]
-
     try:
+        # Get all tables from the database
+        all_tables = get_tables_in_schema(db_url)
+
+        # Filter out excluded tables
+        included_tables = [table for table in all_tables if table not in excluded_tables]
+
+        if not included_tables:
+            logger.warning("No tables left to generate models after exclusions.")
+            exit(100)
+
+        logger.info(f"Generating models for tables: {included_tables}")
+
+        # Construct the command to generate models for the included tables
+        command = [
+            'sqlacodegen',
+            db_url,
+            '--outfile',
+            outfile_path,
+            '--tables',
+            ','.join(included_tables)
+        ]
+
         result = subprocess.run(command, check=True, capture_output=True, text=True)
         logger.info("Output:\n" + result.stdout)
-        logger.error("Errors:\n" + result.stderr)
+        if result.stderr:
+            logger.error("Errors:\n" + result.stderr)
     except subprocess.CalledProcessError as e:
-        logger.error(f"An error occurred: {e}")
+        logger.error(f"sqlacodegen failed with error: {e}")
         raise RuntimeError(f"sqlacodegen failed: {e}") from e
+    except Exception as e:
+        logger.error(f"An unexpected error occurred: {e}")
+        raise
 
 
 if __name__ == "__main__":

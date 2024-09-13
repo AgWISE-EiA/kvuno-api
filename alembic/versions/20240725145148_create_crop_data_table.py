@@ -9,6 +9,7 @@ from typing import Sequence, Union
 
 import sqlalchemy as sa
 from alembic import op
+from geoalchemy2 import Geometry
 
 from app.utils.migration_utils import get_integer_column_type
 
@@ -22,14 +23,18 @@ table_name = 'crop_data'
 
 
 def upgrade() -> None:
+    # Ensure PostGIS extension is available
+    op.execute("CREATE EXTENSION IF NOT EXISTS postgis")
+
     op.create_table(
         f"{table_name}",
         sa.Column('id', get_integer_column_type(), primary_key=True),
-        sa.Column('coordinates', sa.String(50), nullable=True, comment='Coordinates of the crop xy'),
         sa.Column('country', sa.String(20), nullable=True),
         sa.Column('province', sa.String(20), nullable=True),
-        sa.Column('lon', sa.String(10), nullable=True),
-        sa.Column('lat', sa.String(10), nullable=True),
+        sa.Column('coordinates', Geometry('POINT', srid=4326), nullable=False),
+        # op.add_column(table_name, sa.Column('coordinates', Geometry(geometry_type='POINT', srid=4326)))
+        sa.Column('lon', sa.Float(10), nullable=True),
+        sa.Column('lat', sa.Float(10), nullable=True),
         sa.Column('variety', sa.String(20), nullable=True),
         sa.Column('season_type', sa.String(20), nullable=True),
         sa.Column('opt_date', sa.String(8), nullable=True),

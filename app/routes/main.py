@@ -19,7 +19,7 @@ def register_app_routes(app):
         Returns:
             Response: Redirect to /openapi/swagger.
         """
-        return redirect('/openapi/swagger')
+        return redirect('/openapi')
 
     @app.route('/health', methods=['GET'])
     def health_check():
