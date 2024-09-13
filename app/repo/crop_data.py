@@ -3,7 +3,7 @@ from typing import Optional, List, Type
 
 from flask_sqlalchemy.pagination import QueryPagination
 from geoalchemy2 import WKTElement
-from geoalchemy2.functions import ST_DWithin
+from sqlalchemy import func
 from sqlalchemy.exc import SQLAlchemyError
 from sqlalchemy.orm import Query
 
@@ -69,14 +69,13 @@ class CropDataRepo:
 
         query = session.query(CropData)
 
-        if filters.coordinates:
-            lon_str, lat_str = filters.coordinates.split(',')
-            point = WKTElement(f'POINT({lon_str} {lat_str})', srid=4326)
+        if filters.coordinates and filters.radius:
+            lon, lat = map(float, filters.coordinates.split(","))
+            point = WKTElement(f'POINT({lon} {lat})', srid=4326)
 
-            # Query records that are within the specified distance from the point
-            query = (
-                session.query(CropData)
-                .filter(ST_DWithin(CropData.coordinates, point, filters.radius))
+            # Filter by radius using ST_DWithin and calculate distance using ST_Distance
+            query = query.filter(
+                func.ST_DWithin(CropData.coordinates, point, filters.radius)
             )
         if filters.country:
             query = query.filter(CropData.country == filters.country)
@@ -92,6 +91,7 @@ class CropDataRepo:
         if filters.planting_option is not None:
             query = query.filter(CropData.planting_option == filters.planting_option)
 
+        query = query.order_by(CropData.id)
         return query
 
     def get_paginated_data(self, filters: PlantingDataFilter, page: int, per_page: int) -> QueryPagination:

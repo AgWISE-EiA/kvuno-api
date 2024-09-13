@@ -17,7 +17,6 @@ from app.repo.crop_data import CropDataRepo
 from app.repo.processed_files import ProcessedFilesRepo
 from app.utils import calculate_file_checksum
 from app.utils.logging import SharedLogger
-from geoalchemy2 import WKTElement
 
 # Load environment variables from .env file
 load_dotenv()
@@ -77,6 +76,7 @@ def process_file(file_path: str, batch_size: int = 1000, chunk_size: int = 10000
                     coordinates = row['XY'] if pd.notna(row['XY']) else None
                     if coordinates:
                         record = CropDataRecord(
+                            id=None,
                             country=row['country'] if pd.notna(row['country']) else None,
                             province=row['province'] if pd.notna(row['province']) else None,
                             lon=row['lon'] if pd.notna(row['lon']) else None,

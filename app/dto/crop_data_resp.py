@@ -14,6 +14,7 @@ class Coordinates(BaseModel):
 
 
 class CropDataRecord(BaseModel):
+    id: Optional[int]  # Latitude as float
     lat: Optional[float]  # Latitude as float
     lon: Optional[float]  # Longitude as float
     country: Optional[str]

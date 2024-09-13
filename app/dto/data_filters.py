@@ -6,7 +6,7 @@ from pydantic import BaseModel, Field, ConfigDict, field_validator
 
 class PlantingDataFilterBase:
     coordinates: Optional[str] = Field(None, description='Coordinates in lon,lat format')
-    radius: Optional[float] = Field(1000, description='Radius to search from defined coordinates in meters')
+    radius: Optional[float] = Field(None, description='Radius to search from defined coordinates in meters')
     country: Optional[str] = Field(None, description='Country where the crop is located')
     province: Optional[str] = Field(None, description='Province where the crop is located')
     variety: Optional[str] = Field(None, description='Crop variety')
