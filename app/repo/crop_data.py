@@ -82,6 +82,8 @@ class CropDataRepo:
         if filters.province:
             # Perform partial search for province
             query = query.filter(CropData.province.ilike(f"%{filters.province}%"))
+        if filters.crop_name:
+            query = query.filter(CropData.crop_name == filters.crop_name)
         if filters.variety:
             query = query.filter(CropData.variety == filters.variety)
         if filters.season_type:
