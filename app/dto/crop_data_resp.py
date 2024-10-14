@@ -18,6 +18,7 @@ class CropDataRecord(BaseModel):
     lat: Optional[float]  # Latitude as float
     lon: Optional[float]  # Longitude as float
     country: Optional[str]
+    crop_name: Optional[str]
     province: Optional[str]
     variety: Optional[str]
     season_type: Optional[str]

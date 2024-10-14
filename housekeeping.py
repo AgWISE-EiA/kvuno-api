@@ -82,6 +82,7 @@ def process_file(file_path: str, batch_size: int = 1000, chunk_size: int = 10000
                         record = CropDataRecord(
                             id=None,
                             country=row['country'] if pd.notna(row['country']) else None,
+                            crop_name=crop_name,
                             province=row['province'] if pd.notna(row['province']) else None,
                             lon=row['lon'] if pd.notna(row['lon']) else None,
                             lat=row['lat'] if pd.notna(row['lat']) else None,
