@@ -21,10 +21,10 @@ class CropDataRecord(BaseModel):
     crop_name: Optional[str]
     province: Optional[str]
     variety: Optional[str]
-    season_type: Optional[str]
+    season_type: Optional[str] = None
     opt_date: Optional[str]
     planting_option: Optional[int]
-    check_sum: Optional[str]
+    check_sum: Optional[str] = None
 
     # class Config:
     #     orm_mode = True  # Ensures compatibility with ORM models if needed

@@ -30,6 +30,16 @@ processed_files_repo = ProcessedFilesRepo()
 crop_data_repo = CropDataRepo()
 
 
+def safe_get(row, key, default=None):
+    """
+    Safely get a value from a pandas Series (row) by key.
+    Returns default if the key doesn't exist or the value is NaN.
+    """
+    if key in row.index and pd.notna(row[key]):
+        return row[key]
+    return default
+
+
 def process_file(file_path: str, batch_size: int = 1000, chunk_size: int = 10000):
     """
     Processes a single file by reading its contents in chunks, converting data to `PlantingDataREcord` instances,
@@ -81,15 +91,16 @@ def process_file(file_path: str, batch_size: int = 1000, chunk_size: int = 10000
                     if coordinates:
                         record = CropDataRecord(
                             id=None,
-                            country=row['country'] if pd.notna(row['country']) else None,
+                            country=safe_get(row, 'country'),
                             crop_name=crop_name,
-                            province=row['province'] if pd.notna(row['province']) else None,
-                            lon=row['lon'] if pd.notna(row['lon']) else None,
-                            lat=row['lat'] if pd.notna(row['lat']) else None,
-                            variety=row['Variety'] if pd.notna(row['Variety']) else None,
-                            season_type=row['Season_type'] if pd.notna(row['Season_type']) else None,
-                            opt_date=row['Opt_date'] if pd.notna(row['Opt_date']) else None,
-                            planting_option=int(row['Planting_Option']) if pd.notna(row['Planting_Option']) else None,
+                            province=safe_get(row, 'province'),
+                            lon=safe_get(row, 'lon'),
+                            lat=safe_get(row, 'lat'),
+                            variety=safe_get(row, 'Variety'),
+                            season_type=safe_get(row, 'Season_type'),
+                            opt_date=safe_get(row, 'Opt_date'),
+                            planting_option=int(safe_get(row, 'Planting_Option')) if safe_get(row,
+                                                                                              'Planting_Option') is not None else None,
                             check_sum=checksum
                         )
                         crop_data_records.append(record)
