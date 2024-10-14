@@ -5,6 +5,7 @@ import concurrent.futures
 import logging
 import os
 import time
+import re
 
 import pandas as pd
 import pyreadr
@@ -29,6 +30,16 @@ processed_files_repo = ProcessedFilesRepo()
 crop_data_repo = CropDataRepo()
 
 
+def safe_get(row, key, default=None):
+    """
+    Safely get a value from a pandas Series (row) by key.
+    Returns default if the key doesn't exist or the value is NaN.
+    """
+    if key in row.index and pd.notna(row[key]):
+        return row[key]
+    return default
+
+
 def process_file(file_path: str, batch_size: int = 1000, chunk_size: int = 10000):
     """
     Processes a single file by reading its contents in chunks, converting data to `PlantingDataREcord` instances,
@@ -46,16 +57,19 @@ def process_file(file_path: str, batch_size: int = 1000, chunk_size: int = 10000
 
     start_time = time.time()  # Start timing
     file_name = os.path.basename(file_path)  # Extract the filename without path
+    lookup_words = os.getenv('LOOKUP_WORDS', default='soybean,maize').split(',')
 
     with app.app_context():
         try:
             checksum = calculate_file_checksum(file_path, logger)
 
+            crop_name = lookup_words_in_rds(file_name, lookup_words)
+
             if processed_files_repo.get_processed_file_by_checksum(checksum):
                 logger.warning(f"File {file_name} is already processed. Checksum: {checksum}")
                 return  # Skip processing if file is already processed
 
-            logger.info(f"Processing file {file_name} in chunks of size {chunk_size}")
+            logger.info(f"Processing file {file_name} in chunks of size {chunk_size} for crop {crop_name}")
 
             # Initialize batch processing
             crop_data_records = []
@@ -77,14 +91,16 @@ def process_file(file_path: str, batch_size: int = 1000, chunk_size: int = 10000
                     if coordinates:
                         record = CropDataRecord(
                             id=None,
-                            country=row['country'] if pd.notna(row['country']) else None,
-                            province=row['province'] if pd.notna(row['province']) else None,
-                            lon=row['lon'] if pd.notna(row['lon']) else None,
-                            lat=row['lat'] if pd.notna(row['lat']) else None,
-                            variety=row['Variety'] if pd.notna(row['Variety']) else None,
-                            season_type=row['Season_type'] if pd.notna(row['Season_type']) else None,
-                            opt_date=row['Opt_date'] if pd.notna(row['Opt_date']) else None,
-                            planting_option=int(row['Planting_Option']) if pd.notna(row['Planting_Option']) else None,
+                            country=safe_get(row, 'country'),
+                            crop_name=crop_name,
+                            province=safe_get(row, 'province'),
+                            lon=safe_get(row, 'lon'),
+                            lat=safe_get(row, 'lat'),
+                            variety=safe_get(row, 'Variety'),
+                            season_type=safe_get(row, 'Season_type'),
+                            opt_date=safe_get(row, 'Opt_date'),
+                            planting_option=int(safe_get(row, 'Planting_Option')) if safe_get(row,
+                                                                                              'Planting_Option') is not None else None,
                             check_sum=checksum
                         )
                         crop_data_records.append(record)
@@ -147,6 +163,36 @@ def load_rds_to_db(data_folder: str, batch_size: int = 1000, chunk_size: int = 1
         logger.info(f"Processing all files took {int(minutes)} minutes and {seconds:.2f} seconds")
     else:
         logger.info(f"Processing all files took {global_elapsed_time:.2f} seconds")
+
+
+def lookup_words_in_rds(text, target_words):
+    """
+    Extracts the first occurrence of any of the target words from the given text.
+    The match is case-insensitive and can be part of a larger word.
+
+    Args:
+    text (str): The input string to extract from.
+    target_words (list): A list of words to search for.
+
+    Returns:
+    tuple: A tuple containing the matched word and the target word that matched.
+    None: If no match is found.
+    """
+    # Escape special characters in the target words and join them with '|'
+    escaped_targets = '|'.join(re.escape(word) for word in target_words)
+
+    # Create a case-insensitive regular expression pattern
+    pattern = re.compile(f'\\b\\w*({escaped_targets})\\w*\\b', re.IGNORECASE)
+
+    # Search for the first match
+    match = pattern.search(text)
+
+    if match:
+        full_match = match.group(0)  # The entire matched word
+        matched_target = match.group(1)  # The specific target word that matched
+        return matched_target.lower()
+    else:
+        return None
 
 
 if __name__ == '__main__':

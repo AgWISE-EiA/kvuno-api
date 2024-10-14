@@ -14,6 +14,11 @@ tag = Tag(name='User', description="User management API")
 api = APIBlueprint(__bp__, __name__, url_prefix=url_prefix, abp_tags=[tag])
 
 
+@api.post('/')
+def index():
+    return jsonify({"msg": "All users"})
+
+
 @api.post('/register')
 def register():
     # Implement the registration logic here

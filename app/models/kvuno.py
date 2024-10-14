@@ -1,10 +1,9 @@
-import datetime
 from typing import Any, Optional
 
 from geoalchemy2.types import Geometry
 from sqlalchemy import BigInteger, DateTime, Float, Index, Integer, PrimaryKeyConstraint, String, UniqueConstraint, text
 from sqlalchemy.orm import DeclarativeBase, Mapped, mapped_column
-
+import datetime
 
 class Base(DeclarativeBase):
     pass
@@ -28,10 +27,11 @@ class CropData(Base):
     )
 
     id: Mapped[int] = mapped_column(BigInteger, primary_key=True)
+    coordinates: Mapped[Any] = mapped_column(Geometry('POINT', 4326, from_text='ST_GeomFromEWKT', name='geometry', nullable=False))
     check_sum: Mapped[str] = mapped_column(String(100))
+    crop_name: Mapped[str] = mapped_column(String(20))
     country: Mapped[Optional[str]] = mapped_column(String(20))
     province: Mapped[Optional[str]] = mapped_column(String(20))
-    coordinates: Mapped[Optional[Any]] = mapped_column(Geometry('POINT', 4326))
     lon: Mapped[Optional[float]] = mapped_column(Float)
     lat: Mapped[Optional[float]] = mapped_column(Float)
     variety: Mapped[Optional[str]] = mapped_column(String(20))

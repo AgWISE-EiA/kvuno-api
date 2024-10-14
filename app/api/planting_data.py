@@ -36,6 +36,7 @@ def get_data(query: PlantingDataFilter):
         data = [CropDataRecord(
             id=item.id,
             country=item.country,
+            crop_name=item.crop_name,
             province=item.province,
             lon=item.lon,
             lat=item.lat,

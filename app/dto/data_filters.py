@@ -9,6 +9,7 @@ class PlantingDataFilterBase:
     radius: Optional[float] = Field(None, description='Radius to search from defined coordinates in meters')
     country: Optional[str] = Field(None, description='Country where the crop is located')
     province: Optional[str] = Field(None, description='Province where the crop is located')
+    crop_name: Optional[str] = Field(None, description='Name of crop')
     variety: Optional[str] = Field(None, description='Crop variety')
     season_type: Optional[str] = Field(None, description='Type of season, e.g., Average, High')
     opt_date: Optional[str] = Field(None, description='Optional date in YYYY-MM-DD format')
