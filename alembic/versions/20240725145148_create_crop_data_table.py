@@ -11,7 +11,7 @@ import sqlalchemy as sa
 from alembic import op
 from geoalchemy2 import Geometry
 
-from app.utils.migration_utils import get_integer_column_type
+from app.utils.migration_utils import get_integer_column_type, is_specified_db
 
 # revision identifiers, used by Alembic.
 revision: str = 'aa7eb765e5d3'
@@ -23,16 +23,18 @@ table_name = 'crop_data'
 
 
 def upgrade() -> None:
-    # Ensure PostGIS extension is available
-    op.execute("CREATE EXTENSION IF NOT EXISTS postgis")
+    coordinates_column = sa.Column('coordinates', Geometry('POINT'), nullable=False)
+    if is_specified_db(db_dialect='postgresql'):
+        # Ensure PostGIS extension is available
+        op.execute("CREATE EXTENSION IF NOT EXISTS postgis")
+        coordinates_column = sa.Column('coordinates', Geometry('POINT', srid=4326), nullable=False)
 
     op.create_table(
         f"{table_name}",
         sa.Column('id', get_integer_column_type(), primary_key=True),
         sa.Column('country', sa.String(20), nullable=True),
         sa.Column('province', sa.String(20), nullable=True),
-        sa.Column('coordinates', Geometry('POINT', srid=4326), nullable=False),
-        # op.add_column(table_name, sa.Column('coordinates', Geometry(geometry_type='POINT', srid=4326)))
+        coordinates_column,
         sa.Column('lon', sa.Float(10), nullable=True),
         sa.Column('lat', sa.Float(10), nullable=True),
         sa.Column('variety', sa.String(20), nullable=True),

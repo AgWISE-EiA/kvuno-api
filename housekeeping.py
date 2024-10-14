@@ -5,6 +5,7 @@ import concurrent.futures
 import logging
 import os
 import time
+import re
 
 import pandas as pd
 import pyreadr
@@ -46,16 +47,19 @@ def process_file(file_path: str, batch_size: int = 1000, chunk_size: int = 10000
 
     start_time = time.time()  # Start timing
     file_name = os.path.basename(file_path)  # Extract the filename without path
+    lookup_words = os.getenv('LOOKUP_WORDS', default='soybean,maize').split(',')
 
     with app.app_context():
         try:
             checksum = calculate_file_checksum(file_path, logger)
 
+            crop_name = lookup_words_in_rds(file_name, lookup_words)
+
             if processed_files_repo.get_processed_file_by_checksum(checksum):
                 logger.warning(f"File {file_name} is already processed. Checksum: {checksum}")
                 return  # Skip processing if file is already processed
 
-            logger.info(f"Processing file {file_name} in chunks of size {chunk_size}")
+            logger.info(f"Processing file {file_name} in chunks of size {chunk_size} for crop {crop_name}")
 
             # Initialize batch processing
             crop_data_records = []
@@ -147,6 +151,36 @@ def load_rds_to_db(data_folder: str, batch_size: int = 1000, chunk_size: int = 1
         logger.info(f"Processing all files took {int(minutes)} minutes and {seconds:.2f} seconds")
     else:
         logger.info(f"Processing all files took {global_elapsed_time:.2f} seconds")
+
+
+def lookup_words_in_rds(text, target_words):
+    """
+    Extracts the first occurrence of any of the target words from the given text.
+    The match is case-insensitive and can be part of a larger word.
+
+    Args:
+    text (str): The input string to extract from.
+    target_words (list): A list of words to search for.
+
+    Returns:
+    tuple: A tuple containing the matched word and the target word that matched.
+    None: If no match is found.
+    """
+    # Escape special characters in the target words and join them with '|'
+    escaped_targets = '|'.join(re.escape(word) for word in target_words)
+
+    # Create a case-insensitive regular expression pattern
+    pattern = re.compile(f'\\b\\w*({escaped_targets})\\w*\\b', re.IGNORECASE)
+
+    # Search for the first match
+    match = pattern.search(text)
+
+    if match:
+        full_match = match.group(0)  # The entire matched word
+        matched_target = match.group(1)  # The specific target word that matched
+        return matched_target.lower()
+    else:
+        return None
 
 
 if __name__ == '__main__':
